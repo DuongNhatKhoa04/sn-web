@@ -1,4 +1,161 @@
-.hover-effect { transition: transform 0.3s ease; }
-.hover-effect:hover { transform: translateY(-5px); }
-.card-img-left { height: 100%; object-fit: cover; }
-.article-content img { max-width: 100%; height: auto; margin: 15px 0; border-radius: 8px; }
+/* =========================================
+   S-NEWS CUSTOM THEME - PASTEL DREAM
+   Colors: #FBFBFB, #E8F9FF, #C4D9FF, #C5BAFF
+   ========================================= */
+
+:root {
+    --bg-body: #FBFBFB;       /* Nền chính */
+    --bg-soft: #E8F9FF;       /* Nền phụ (Card, Section) */
+    --accent-blue: #C4D9FF;   /* Màu nhấn xanh */
+    --accent-purple: #C5BAFF; /* Màu nhấn tím */
+    --text-dark: #4A4A4A;     /* Màu chữ chính (Xám đậm để dễ đọc trên nền sáng) */
+    --text-light: #6c757d;    /* Màu chữ phụ */
+    --shadow-soft: 0 10px 25px rgba(197, 186, 255, 0.25); /* Bóng đổ màu tím nhạt */
+}
+
+body {
+    background-color: var(--bg-body);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
+}
+
+/* --- 1. NAVBAR (Thanh menu) --- */
+.navbar {
+    /* Tạo dải màu gradient từ Xanh sang Tím */
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)) !important;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.navbar-brand {
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    color: #fff !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    padding: 8px 15px !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+/* Ô tìm kiếm trong menu */
+.navbar input[type="search"] {
+    border-radius: 20px 0 0 20px;
+    border: none;
+    background-color: rgba(255,255,255,0.9);
+}
+.navbar .btn-outline-light {
+    border-radius: 0 20px 20px 0;
+    border: none;
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* --- 2. CARDS (Thẻ tin tức) --- */
+.card {
+    border: none !important;
+    background-color: #fff;
+    border-radius: 16px !important;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* Bóng nhẹ mặc định */
+}
+
+.card:hover {
+    transform: translateY(-8px); /* Bay lên khi di chuột */
+    box-shadow: var(--shadow-soft) !important; /* Bóng đổ màu tím đậm hơn */
+}
+
+.card-img-top, .card-img-left {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title a {
+    color: #2c3e50;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.card-title a:hover {
+    color: var(--accent-purple);
+}
+
+.badge {
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-weight: 600;
+    background-color: var(--bg-soft) !important;
+    color: var(--text-dark) !important;
+    border: 1px solid var(--accent-blue);
+}
+
+/* --- 3. BUTTONS (Nút bấm) --- */
+.btn-primary, .btn-outline-primary {
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 25px; /* Nút tròn */
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(197, 186, 255, 0.4);
+}
+
+.btn-primary:hover, .btn-outline-primary:hover {
+    background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(197, 186, 255, 0.6);
+}
+
+/* --- 4. CAROUSEL (Slider) --- */
+#newsCarousel {
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 4px solid #fff; /* Viền trắng bo quanh ảnh */
+}
+
+/* --- 5. FOOTER --- */
+.footer {
+    background: linear-gradient(to right, #4a4a4a, #2c3e50) !important; /* Footer màu tối để tương phản */
+    margin-top: 50px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+}
+
+/* --- 6. CHI TIẾT BÀI VIẾT --- */
+.article-content img {
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* --- 7. BÌNH LUẬN --- */
+#commentList .d-flex {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid var(--bg-soft);
+}
+#commentList img {
+    border: 2px solid var(--accent-blue);
+    padding: 2px;
+}

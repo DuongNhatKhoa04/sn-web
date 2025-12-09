@@ -55,7 +55,7 @@ abstract class BasePage {
     protected function renderHeader() {
         $root = $this->assets_folder;
         ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="<?php echo $root; ?>index.php">
                     <i class="fa-solid fa-newspaper me-2"></i>S-NEWS
