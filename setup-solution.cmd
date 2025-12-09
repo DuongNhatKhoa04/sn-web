@@ -1,98 +1,94 @@
 @echo off
 setlocal enabledelayedexpansion
+title [PHAN 1] SETUP VAO XAMPP (Force Mode)
+color 0B
+
+:: 0. LUU VI TRI FILE SCRIPT
+set "SCRIPT_LOC=%~dp0"
 
 :: ==========================================
-:: 1. CAU HINH DUONG DAN
+:: 1. CAU HINH
 :: ==========================================
-:: 1. O dia goc
-set "DRIVE=D:"
-
-:: 2. Thu muc cha (Container)
-set "PARENT_FOLDER=sn-web"
-
-:: 3. Ten du an (Project)
+:: Chung ta se bo qua viec kiem tra, cu mac dinh la co XAMPP
+set "XAMPP_ROOT=C:\xampp"
+set "XAMPP_DOCS=C:\xampp\htdocs"
 set "PROJECT_NAME=s-news"
-
-:: ==> DUONG DAN CUOI CUNG: D:\sn-web\s-news
-set "TARGET_DIR=%DRIVE%\%PARENT_FOLDER%\%PROJECT_NAME%"
 set "DB_NAME=s_news_db"
+set "TARGET_DIR=%XAMPP_DOCS%\%PROJECT_NAME%"
 
-echo.
 echo ========================================================
-echo   [AUTO SETUP] KHOI TAO DU AN
-echo   1. Thu muc cha: %DRIVE%\%PARENT_FOLDER%
-echo   2. Du an con:   %PROJECT_NAME%
-echo   ------------------------------------------------------
-echo   VI TRI CAI DAT: %TARGET_DIR%
+echo   [PHAN 1] KHOI TAO DU AN (FORCE MODE)
+echo   Vi tri cai dat: %TARGET_DIR%
 echo ========================================================
-echo.
 
-:: 2. TAO CAY THU MUC
-echo [+] Buoc 1/3: Tao cau truc thu muc...
+:: 2. TU DONG SUA LOI THIEU THU MUC
+echo [+] Dang chuan bi moi truong...
 
-:: Lenh nay se tu dong tao ca thu muc cha va con
+:: Neu chua co folder xampp thi tu tao luon (de phong)
+if not exist "%XAMPP_ROOT%" mkdir "%XAMPP_ROOT%"
+
+:: Neu co xampp ma thieu htdocs thi tu tao htdocs luon
+if not exist "%XAMPP_DOCS%" (
+    echo [!] Phat hien thieu thu muc htdocs, dang tu tao...
+    mkdir "%XAMPP_DOCS%"
+)
+
+:: 3. TAO THU MUC DU AN
+echo [+] Dang tao folder du an...
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-if not exist "%TARGET_DIR%\classes" mkdir "%TARGET_DIR%\classes"
-if not exist "%TARGET_DIR%\pages" mkdir "%TARGET_DIR%\pages"
-if not exist "%TARGET_DIR%\css" mkdir "%TARGET_DIR%\css"
-if not exist "%TARGET_DIR%\js" mkdir "%TARGET_DIR%\js"
-if not exist "%TARGET_DIR%\images" mkdir "%TARGET_DIR%\images"
+cd /d "%TARGET_DIR%"
 
-:: Tao folder cho thu vien Offline
-if not exist "%TARGET_DIR%\vendor" mkdir "%TARGET_DIR%\vendor"
-if not exist "%TARGET_DIR%\vendor\bootstrap\css" mkdir "%TARGET_DIR%\vendor\bootstrap\css"
-if not exist "%TARGET_DIR%\vendor\bootstrap\js" mkdir "%TARGET_DIR%\vendor\bootstrap\js"
-if not exist "%TARGET_DIR%\vendor\jquery" mkdir "%TARGET_DIR%\vendor\jquery"
+for %%F in (classes pages css js images vendor) do (
+    if not exist "%%F" mkdir "%%F"
+)
 
-:: 3. TAO FILE CODE RONG
-echo [+] Buoc 2/3: Tao file ma nguon chuan OOP...
+mkdir "vendor\bootstrap\css" 2>nul
+mkdir "vendor\bootstrap\js" 2>nul
+mkdir "vendor\jquery" 2>nul
+mkdir "vendor\fontawesome\css" 2>nul
 
-type nul > "%TARGET_DIR%\index.php"
-type nul > "%TARGET_DIR%\classes\Database.php"
-type nul > "%TARGET_DIR%\classes\BasePage.php"
-type nul > "%TARGET_DIR%\pages\search.php"
-type nul > "%TARGET_DIR%\pages\category.php"
-type nul > "%TARGET_DIR%\pages\detail.php"
-type nul > "%TARGET_DIR%\pages\contact.php"
-type nul > "%TARGET_DIR%\pages\about.php"
-type nul > "%TARGET_DIR%\css\style.css"
-type nul > "%TARGET_DIR%\js\main.js"
-
-:: 4. TAO FILE SQL TU DONG
-echo [+] Buoc 3/3: Tao file SQL Database (%DB_NAME%)...
-
+:: 4. TAO FILE SQL
+echo [+] Tao file SQL...
 (
-echo CREATE DATABASE IF NOT EXISTS %DB_NAME% CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+echo CREATE DATABASE IF NOT EXISTS %DB_NAME%;
 echo USE %DB_NAME%;
-echo.
-echo CREATE TABLE articles ^(
-echo     id INT AUTO_INCREMENT PRIMARY KEY,
-echo     title VARCHAR^(255^) NOT NULL,
-echo     summary TEXT,
-echo     content TEXT,
-echo     image_url VARCHAR^(255^),
-echo     category VARCHAR^(50^) DEFAULT 'Thời sự',
-echo     views INT DEFAULT 0,
-echo     likes INT DEFAULT 0,
-echo     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-echo ^);
-echo.
-echo INSERT INTO articles ^(title, summary, content, image_url, category, views, likes^) VALUES 
-echo ^('Sinh viên CNTT chế tạo robot hỗ trợ người già', 'Nhóm sinh viên trường ĐH vừa ra mắt sản phẩm...', 'Nội dung chi tiết...', 'https://placehold.co/600x400', 'Công nghệ', 1500, 230^),
-echo ^('Lịch thi học kỳ mới nhất năm 2024', 'Phòng đào tạo vừa công bố lịch thi chính thức...', 'Nội dung chi tiết...', 'https://placehold.co/600x400', 'Thời sự', 8900, 1200^),
-echo ^('Căng tin trường thay đổi thực đơn giá rẻ', 'Nhiều món ăn mới hấp dẫn sinh viên...', 'Nội dung chi tiết...', 'https://placehold.co/600x400', 'Đời sống', 4500, 670^);
-) > "%TARGET_DIR%\setup_database.sql"
+echo CREATE TABLE articles (id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255));
+echo INSERT INTO articles (title) VALUES ('Chao mung den voi S-News tren XAMPP');
+) > "setup_database.sql"
 
+:: 5. TAO INDEX.PHP
+echo [+] Tao file Index.php...
+(
+echo ^<!DOCTYPE html^>
+echo ^<html^>
+echo ^<head^>
+echo     ^<title^>%PROJECT_NAME%^</title^>
+echo     ^<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css"^>
+echo ^</head^>
+echo ^<body class="p-5"^>
+echo     ^<div class="container"^>
+echo         ^<div class="alert alert-success"^>
+echo             ^<h1^>CHAY THANH CONG TREN LOCALHOST!^</h1^>
+echo             ^<p^>Web dang chay tai: %TARGET_DIR%^</p^>
+echo         ^</div^>
+echo         ^<button class="btn btn-primary"^>Nut Bam Bootstrap^</button^>
+echo     ^</div^>
+echo     ^<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"^>^</script^>
+echo ^</body^>
+echo ^</html^>
+) > "index.php"
+
+:: 6. GOI FILE DOWNLOAD
 echo.
-echo ========================================================
-echo   CAI DAT THANH CONG!
-echo ========================================================
-echo   Luu y cau hinh WAMP Alias:
-echo.
-echo   1. Tai Bootstrap va jQuery ve: %TARGET_DIR%\vendor
-echo   2. Tao Alias 's-news' trong WAMP tro den: D:/sn-web/s-news/
-echo   3. Import file sql vao phpMyAdmin.
-echo.
-pause
-explorer "%TARGET_DIR%"
+echo [!] Chuyen sang tai thu vien...
+
+:: Goi file download bang duong dan tuyet doi
+if exist "%SCRIPT_LOC%download.cmd" (
+    call "%SCRIPT_LOC%download.cmd" "%TARGET_DIR%"
+) else (
+    echo [LOI] Khong tim thay file 'download.cmd' tai:
+    echo %SCRIPT_LOC%
+    echo Vui long kiem tra lai xem file download co nam cung cho khong.
+    pause
+)
