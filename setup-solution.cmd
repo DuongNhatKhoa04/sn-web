@@ -2,24 +2,37 @@
 setlocal enabledelayedexpansion
 
 :: ==========================================
-:: 1. CAU HINH DU AN
+:: 1. CAU HINH DUONG DAN
 :: ==========================================
-set "DRIVE=D:\sn-web"
+:: 1. O dia goc
+set "DRIVE=D:"
+
+:: 2. Thu muc cha (Container)
+set "PARENT_FOLDER=sn-web"
+
+:: 3. Ten du an (Project)
 set "PROJECT_NAME=s-news"
-set "TARGET_DIR=%DRIVE%\%PROJECT_NAME%"
+
+:: ==> DUONG DAN CUOI CUNG: D:\sn-web\s-news
+set "TARGET_DIR=%DRIVE%\%PARENT_FOLDER%\%PROJECT_NAME%"
 set "DB_NAME=s_news_db"
 
 echo.
 echo ========================================================
-echo   [AUTO SETUP] KHOI TAO DU AN: %PROJECT_NAME%
+echo   [AUTO SETUP] KHOI TAO DU AN
+echo   1. Thu muc cha: %DRIVE%\%PARENT_FOLDER%
+echo   2. Du an con:   %PROJECT_NAME%
+echo   ------------------------------------------------------
 echo   VI TRI CAI DAT: %TARGET_DIR%
 echo ========================================================
 echo.
 
-:: 2. TAO CAY THU MUC (BAO GOM VENDOR OFFLINE)
+:: 2. TAO CAY THU MUC
 echo [+] Buoc 1/3: Tao cau truc thu muc...
 
+:: Lenh nay se tu dong tao ca thu muc cha va con
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
 if not exist "%TARGET_DIR%\classes" mkdir "%TARGET_DIR%\classes"
 if not exist "%TARGET_DIR%\pages" mkdir "%TARGET_DIR%\pages"
 if not exist "%TARGET_DIR%\css" mkdir "%TARGET_DIR%\css"
@@ -32,7 +45,7 @@ if not exist "%TARGET_DIR%\vendor\bootstrap\css" mkdir "%TARGET_DIR%\vendor\boot
 if not exist "%TARGET_DIR%\vendor\bootstrap\js" mkdir "%TARGET_DIR%\vendor\bootstrap\js"
 if not exist "%TARGET_DIR%\vendor\jquery" mkdir "%TARGET_DIR%\vendor\jquery"
 
-:: 3. TAO FILE CODE RONG (PLACEHOLDERS)
+:: 3. TAO FILE CODE RONG
 echo [+] Buoc 2/3: Tao file ma nguon chuan OOP...
 
 type nul > "%TARGET_DIR%\index.php"
@@ -75,10 +88,11 @@ echo.
 echo ========================================================
 echo   CAI DAT THANH CONG!
 echo ========================================================
-echo   Tiep theo, ban hay lam 3 viec sau:
-echo   1. Tai Bootstrap va jQuery ve thu muc: %TARGET_DIR%\vendor
-echo   2. Tao Alias 's-news' trong WAMP tro den: D:/s-news/
-echo   3. Import file 'setup_database.sql' vao phpMyAdmin.
+echo   Luu y cau hinh WAMP Alias:
+echo.
+echo   1. Tai Bootstrap va jQuery ve: %TARGET_DIR%\vendor
+echo   2. Tao Alias 's-news' trong WAMP tro den: D:/sn-web/s-news/
+echo   3. Import file sql vao phpMyAdmin.
 echo.
 pause
 explorer "%TARGET_DIR%"
