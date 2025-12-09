@@ -14,15 +14,33 @@ abstract class BasePage {
         $this->db = $database->getConnection();
     }
 
-    // Hàm hỗ trợ lấy ảnh (Ưu tiên Offline -> Fallback Online)
+    // --- HÀM TẢI ẢNH THÔNG MINH (Smart Image Loader) ---
     protected function getImageUrl($url) {
-        // 1. Nếu trong DB có link ảnh và file đó tồn tại trên máy
-        $localPath = $this->assets_folder . $url;
-        if (!empty($url) && file_exists(__DIR__ . "/../" . $url)) {
-            return $localPath;
+        if (empty($url)) return "https://placehold.co/600x400/e9ecef/6c757d?text=No+Image";
+
+        // Danh sách các đuôi ảnh ưu tiên tìm kiếm
+        $extensions = ['', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+        
+        // Đường dẫn thực tế trên ổ cứng (để kiểm tra file_exists)
+        $baseDir = __DIR__ . "/../"; 
+        
+        // Đường dẫn để hiển thị trên web
+        $webPath = $this->assets_folder;
+
+        // Vòng lặp kiểm tra từng đuôi file
+        foreach ($extensions as $ext) {
+            // Thử ghép đuôi file vào (Ví dụ: images/anh1 + .png)
+            $tryPath = $url . $ext;
+            
+            // Kiểm tra xem file có tồn tại trên ổ cứng không
+            if (file_exists($baseDir . $tryPath) && is_file($baseDir . $tryPath)) {
+                // Nếu tìm thấy, trả về đường dẫn tương đối cho Web
+                return $webPath . $tryPath;
+            }
         }
-        // 2. Nếu không có, trả về ảnh mẫu Online (Placeholder)
-        return "https://placehold.co/600x400/e9ecef/6c757d?text=S-NEWS+Image";
+
+        // Nếu dò hết các đuôi mà không thấy file nào, trả về ảnh mẫu online
+        return "https://placehold.co/600x400/e9ecef/6c757d?text=Image+Not+Found";
     }
 
     public function render() {
@@ -45,6 +63,9 @@ abstract class BasePage {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title><?php echo $this->title; ?></title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="<?php echo $this->assets_folder; ?>vendor/bootstrap/css/bootstrap.min.css">
             <link rel="stylesheet" href="<?php echo $this->assets_folder; ?>vendor/fontawesome/css/all.min.css">
             <link rel="stylesheet" href="<?php echo $this->assets_folder; ?>css/style.css">
