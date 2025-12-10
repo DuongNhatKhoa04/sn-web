@@ -44,19 +44,21 @@ class HomePage extends BasePage {
 
                         <div class="carousel-inner">
                             <?php foreach ($banners as $index => $banner): ?>
-                                
                                 <?php 
-                                    // THÊM DÒNG NÀY: Sử dụng hàm getImageUrl của BasePage để xử lý đường dẫn ảnh
-                                    // Lưu ý: Vì đang ở trong hàm renderBody của class HomePage kế thừa BasePage, ta dùng $this
+                                    // 1. Xử lý ảnh: dùng hàm getImageUrl của BasePage
                                     $bannerImg = $this->getImageUrl($banner['image_url']); 
+                                    
+                                    // 2. Sửa lỗi Link: đổi article_detail.php -> pages/detail.php
+                                    $bannerLink = $banner['link_url'];
+                                    $bannerLink = str_replace('article_detail.php', 'pages/detail.php', $bannerLink);
                                 ?>
 
                                 <div class="carousel-item <?= ($index === 0) ? 'active' : '' ?>">
-                                    <a href="<?= htmlspecialchars($banner['link_url']) ?>">
+                                    <a href="<?= htmlspecialchars($bannerLink) ?>">
                                         <img src="<?= $bannerImg ?>" 
-                                            class="d-block w-100" 
-                                            style="height: 450px; object-fit: cover;" 
-                                            alt="<?= htmlspecialchars($banner['title']) ?>">
+                                             class="d-block w-100" 
+                                             style="height: 450px; object-fit: cover;" 
+                                             alt="<?= htmlspecialchars($banner['title']) ?>">
                                         
                                         <?php if (!empty($banner['title'])): ?>
                                         <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.5); border-radius: 8px;">
@@ -67,6 +69,7 @@ class HomePage extends BasePage {
                                 </div>
                             <?php endforeach; ?>
                         </div>
+
                         <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon"></span>
                         </button>
@@ -93,7 +96,6 @@ class HomePage extends BasePage {
                 foreach ($listArticles as $row) {
                     $link = "pages/detail.php?id=" . $row['id'];
                     $img = $this->getImageUrl($row['image_url']);
-                    // Kiểm tra null cho likes
                     $likes = isset($row['likes']) ? $row['likes'] : 0;
                     
                     echo '
@@ -154,6 +156,82 @@ class HomePage extends BasePage {
             </ul>
         </nav>
         <?php endif; ?>
+        
+        <script>
+        // Hàm xử lý Like/Unlike khi bấm nút
+        function toggleLike(btn, articleId) {
+            var $btn = $(btn);
+            var storageKey = 'liked_articles';
+            var likedList = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            var isLiked = likedList.includes(articleId);
+            var action = isLiked ? 'unlike' : 'like'; // Đảo ngược trạng thái
+
+            $btn.prop('disabled', true); // Khóa nút khi đang xử lý
+
+            $.ajax({
+                url: 'api/api_like.php', // Gọi API
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: articleId, action: action }),
+                success: function(response) {
+                    if (response.success) {
+                        // 1. Cập nhật số lượng like hiển thị
+                        $btn.find('.like-count').text(response.new_likes);
+
+                        // 2. Cập nhật localStorage
+                        if (action === 'like') {
+                            likedList.push(articleId);
+                        } else {
+                            likedList = likedList.filter(id => id !== articleId);
+                        }
+                        localStorage.setItem(storageKey, JSON.stringify(likedList));
+
+                        // 3. Cập nhật màu sắc nút
+                        updateLikeButtonUI($btn, action === 'like');
+                    }
+                    $btn.prop('disabled', false);
+                },
+                error: function() {
+                    alert('Lỗi kết nối!');
+                    $btn.prop('disabled', false);
+                }
+            });
+        }
+
+        // Hàm cập nhật giao diện nút (Icon đặc/rỗng, Màu đỏ/trắng)
+        function updateLikeButtonUI($btn, isLiked) {
+            var $icon = $btn.find('i');
+            if (isLiked) {
+                $btn.removeClass('btn-outline-danger').addClass('btn-danger'); // Nền đỏ
+                $icon.removeClass('fa-regular').addClass('fa-solid'); // Tim đặc
+                $btn.css('color', 'white');
+            } else {
+                $btn.removeClass('btn-danger').addClass('btn-outline-danger'); // Viền đỏ
+                $icon.removeClass('fa-solid').addClass('fa-regular'); // Tim rỗng
+                $btn.css('color', ''); // Reset màu chữ
+            }
+        }
+
+        // Khi load trang xong: Kiểm tra localStorage để tô màu các bài đã like
+        $(document).ready(function() {
+            var likedList = JSON.parse(localStorage.getItem('liked_articles') || '[]');
+            
+            $('.like-btn').each(function() {
+                // Lấy ID từ thuộc tính onclick="toggleLike(this, 123)"
+                var onclickVal = $(this).attr('onclick'); 
+                if(onclickVal) {
+                    var match = onclickVal.match(/\d+/);
+                    if(match) {
+                        var id = parseInt(match[0]);
+                        // Nếu ID này có trong danh sách đã like -> update giao diện
+                        if (likedList.includes(id)) {
+                            updateLikeButtonUI($(this), true);
+                        }
+                    }
+                }
+            });
+        });
+        </script>
         
         <?php
     }

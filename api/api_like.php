@@ -16,13 +16,20 @@ try {
 // Lấy dữ liệu JSON gửi lên
 $data = json_decode(file_get_contents("php://input"), true);
 $articleId = isset($data['id']) ? (int)$data['id'] : 0;
+$action = isset($data['action']) ? $data['action'] : 'like'; // Nhận action: 'like' hoặc 'unlike'
 
 if ($articleId > 0) {
-    // 1. Tăng like
-    $stmt = $conn->prepare("UPDATE articles SET likes = likes + 1 WHERE id = :id");
+    if ($action === 'unlike') {
+        // Giảm like (nhưng không giảm dưới 0)
+        // Cú pháp GREATEST(0, likes - 1) đảm bảo số like không bị âm
+        $stmt = $conn->prepare("UPDATE articles SET likes = GREATEST(0, likes - 1) WHERE id = :id");
+    } else {
+        // Tăng like
+        $stmt = $conn->prepare("UPDATE articles SET likes = likes + 1 WHERE id = :id");
+    }
     $stmt->execute([':id' => $articleId]);
 
-    // 2. Lấy số like mới
+    // Lấy số like mới nhất để trả về cho giao diện
     $stmt = $conn->prepare("SELECT likes FROM articles WHERE id = :id");
     $stmt->execute([':id' => $articleId]);
     $newCount = $stmt->fetchColumn();
