@@ -82,35 +82,63 @@ abstract class BasePage {
     protected function renderHeader() {
         $root = $this->assets_folder;
         ?>
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top p-3 transition-base" id="mainNav">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="<?php echo $root; ?>index.php">
-                    <i class="fa-solid fa-newspaper me-2"></i>S-NEWS
+                <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo $root; ?>index.php">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <span class="brand-text">S-NEWS</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav mx-auto">
+                        
                         <li class="nav-item"><a class="nav-link" href="<?php echo $root; ?>index.php">Trang chủ</a></li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Danh mục</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?php echo $root; ?>pages/category.php?cat=Thời sự">Thời sự</a></li>
-                                <li><a class="dropdown-item" href="<?php echo $root; ?>pages/category.php?cat=Công nghệ">Công nghệ</a></li>
-                                <li><a class="dropdown-item" href="<?php echo $root; ?>pages/category.php?cat=Đời sống">Đời sống</a></li>
-                                <li><a class="dropdown-item" href="<?php echo $root; ?>pages/category.php?cat=Thông báo">Thông báo</a></li>
+                            <ul class="dropdown-menu border-0 shadow-lg rounded-3 overflow-hidden animate__animated animate__fadeInUp">
+                                <?php
+                                // Kết nối DB lấy danh mục
+                                $stmtCat = $this->db->prepare("SELECT * FROM categories");
+                                $stmtCat->execute();
+                                $categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
+
+                                if(count($categories) > 0) {
+                                    foreach($categories as $cat) {
+                                        $catLink = $root . 'pages/category.php?cat=' . urlencode($cat['name']);
+                                        echo '<li>
+                                            <a class="dropdown-item" href="'.$catLink.'">
+                                                <i class="'.$cat['icon'].' me-2 '.$cat['color'].'"></i>
+                                                '.$cat['name'].'
+                                            </a>
+                                        </li>';
+                                    }
+                                } else {
+                                    echo '<li><span class="dropdown-item text-muted">Chưa có danh mục</span></li>';
+                                }
+                                ?>
                             </ul>
                         </li>
+
                         <li class="nav-item"><a class="nav-link" href="<?php echo $root; ?>pages/about.php">Giới thiệu</a></li>
                     </ul>
-                    <form class="d-flex" action="<?php echo $root; ?>pages/search.php" method="GET">
-                        <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm kiếm..." required>
-                        <button class="btn btn-outline-light" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+
+                    <form class="search-wrapper" action="<?php echo $root; ?>pages/search.php" method="GET">
+                        <input class="search-input" type="search" name="keyword" placeholder="Tìm kiếm tin tức..." required>
+                        <button class="search-btn" type="submit">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
                     </form>
                 </div>
             </div>
         </nav>
+        <div style="height: 100px;"></div>
         <?php
     }
 
