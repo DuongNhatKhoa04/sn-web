@@ -328,3 +328,13 @@ h1, h2, h3 {
 /* Mũi tên trượt khi hover */
 .page-link:hover .fa-chevron-right { transform: translateX(3px); }
 .page-link:hover .fa-chevron-left { transform: translateX(-3px); }
+
+/* --- CLASS DÙNG CHUNG CHO ANIMATION --- */
+.anim-up {
+    animation: fadeInUp 0.5s ease-out forwards; /* Chạy animation trượt lên */
+    opacity: 0; /* Mặc định ẩn để chờ animation chạy */
+}
+
+/* Delay cho đẹp (Menu hiện nhanh, Phân trang hiện chậm hơn xíu) */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.3s; }

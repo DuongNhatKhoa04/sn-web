@@ -4,23 +4,17 @@ require_once 'classes/Article.php';
 
 class HomePage extends BasePage {
     protected function renderBody() {
-        // --- 1. XỬ LÝ PHÂN TRANG ---
-        $limit = 6; // Số bài hiển thị trên 1 trang
-        // Lấy trang hiện tại từ URL (ví dụ: index.php?page=2), mặc định là 1
+        // 1. XỬ LÝ MODEL
+        $limit = 6;
         $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-        // Tính vị trí bắt đầu lấy dữ liệu (Offset)
         $offset = ($currentPage - 1) * $limit;
 
-        // Gọi Model
         $articleModel = new Article();
-        // Lấy danh sách bài viết cho trang hiện tại
         $listArticles = $articleModel->getPaginated($limit, $offset);
-        // Tính tổng số trang
         $totalArticles = $articleModel->getTotalCount();
         $totalPages = ceil($totalArticles / $limit);
-
-        // --- 2. PHẦN GIAO DIỆN SLIDER (Giữ nguyên) ---
         ?>
+        
         <div class="row mb-5 align-items-center">
             <div class="col-lg-12">
                 <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -46,12 +40,12 @@ class HomePage extends BasePage {
             <h3 class="fw-bold m-0" style="color: #6a6a6a;">
                 <i class="fa-solid fa-star text-warning me-2"></i>TIN MỚI NHẤT
             </h3>
-            <div class="ms-3 flex-grow-1" style="height: 2px; background: linear-gradient(90deg, var(--accent-blue), transparent);"></div>
+            <div class="ms-3 flex-grow-1" style="height: 2px; background: linear-gradient(90deg, var(--color-accent), transparent);"></div>
         </div>
 
         <div class="row">
         <?php
-            if (count($listArticles) > 0) {
+            if (!empty($listArticles)) {
                 foreach ($listArticles as $row) {
                     $link = "pages/detail.php?id=" . $row['id'];
                     $img = $this->getImageUrl($row['image_url']);
@@ -83,13 +77,13 @@ class HomePage extends BasePage {
                     </div>';
                 }
             } else {
-                echo '<div class="col-12 text-center py-5 text-muted">Chưa có bài viết nào trong CSDL.</div>';
+                echo '<div class="col-12 text-center py-5 text-muted">Chưa có bài viết nào.</div>';
             }
         ?>
         </div>
 
         <?php if ($totalPages > 1): ?>
-        <nav aria-label="Page navigation" class="mt-5" style="animation: fadeInUp 1.2s ease-out;">
+        <nav aria-label="Page navigation" class="mt-2 anim-up delay-2">
             <ul class="pagination justify-content-center">
                 
                 <li class="page-item <?php echo ($currentPage <= 1) ? 'disabled' : ''; ?>">

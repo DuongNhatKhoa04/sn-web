@@ -51,21 +51,134 @@ INSERT INTO categories (name, icon, color) VALUES
 
 -- 2. Thêm Bài viết mẫu
 INSERT INTO articles (title, summary, content, category, image_url, views, likes, created_at) VALUES 
+-- CÔNG NGHỆ
 (
-    'Trí tuệ nhân tạo (AI) đang thay đổi thế giới', 
-    'AI đang định hình lại thị trường lao động toàn cầu.', 
-    '<p>Nội dung chi tiết về AI...</p>', 
-    'Công nghệ', 'ai-tech.jpg', 0, 0, NOW()
+    'Apple chính thức ấn định ngày ra mắt iPhone 16', 
+    'Cộng đồng iFan đang đứng ngồi không yên trước thông tin rò rỉ mới nhất về sự kiện mùa thu của Apple.', 
+    '<p>Theo các nguồn tin uy tín, Apple sẽ mang đến những nâng cấp vượt trội về camera và chip A18 Pro...</p>', 
+    'Công nghệ', 'iphone-16.jpg', 1540, 342, NOW()
 ),
 (
-    'Mùa lúa chín tại Mù Cang Chải đẹp ngỡ ngàng', 
-    'Những thửa ruộng bậc thang vàng óng trải dài...', 
-    '<p>Nội dung chi tiết du lịch...</p>', 
-    'Du lịch', 'mu-cang-chai.png', 0, 0, NOW()
+    'ChatGPT-5 sẽ thông minh đến mức nào?', 
+    'OpenAI đang âm thầm phát triển thế hệ tiếp theo của mô hình ngôn ngữ lớn, hứa hẹn thay đổi cách chúng ta làm việc.', 
+    '<p>Sam Altman đã tiết lộ rằng GPT-5 sẽ có khả năng suy luận logic tốt hơn và xử lý đa phương thức...</p>', 
+    'Công nghệ', 'ai-future.jpg', 2300, 560, NOW()
 ),
 (
-    'Ngoại hạng Anh: Cuộc đua vô địch kịch tính', 
-    'Man City và Arsenal đang tạo nên cuộc đua song mã...', 
-    '<p>Nội dung thể thao...</p>', 
-    'Thể thao', 'football.webp', 0, 0, NOW()
+    'Mạng 5G bắt đầu phủ sóng rộng rãi tại Hà Nội và TP.HCM', 
+    'Các nhà mạng lớn tại Việt Nam đang đẩy nhanh tiến độ thương mại hóa 5G.', 
+    '<p>Người dùng di động tại các quận trung tâm đã có thể trải nghiệm tốc độ internet siêu nhanh...</p>', 
+    'Công nghệ', '5g-vietnam.jpg', 890, 120, NOW()
+),
+
+-- DU LỊCH
+(
+    'Khám phá hang Sơn Đoòng - Kỳ quan trong lòng đất', 
+    'Hang động lớn nhất thế giới tại Quảng Bình tiếp tục là điểm đến mơ ước của du khách quốc tế.', 
+    '<p>Chuyến thám hiểm kéo dài 4 ngày 3 đêm sẽ đưa bạn qua những khối thạch nhũ khổng lồ và rừng nguyên sinh trong hang...</p>', 
+    'Du lịch', 'son-doong.jpg', 5600, 1200, NOW()
+),
+(
+    'Top 5 quán cà phê view đẹp nhất Đà Lạt năm 2024', 
+    'Đà Lạt không chỉ có hoa mà còn có những quán cà phê săn mây cực chất.', 
+    '<p>Danh sách này bao gồm những địa điểm mới nổi với phong cách thiết kế độc đáo, phù hợp để check-in...</p>', 
+    'Du lịch', 'da-lat-cafe.jpg', 3200, 890, NOW()
+),
+(
+    'Kinh nghiệm du lịch Phú Quốc tự túc 3 ngày 2 đêm', 
+    'Bí kíp ăn chơi, ngủ nghỉ tại Đảo Ngọc với chi phí hợp lý nhất.', 
+    '<p>Đừng bỏ lỡ ngắm hoàng hôn tại Sunset Sanato và thưởng thức bún quậy Kiến Xây...</p>', 
+    'Du lịch', 'phu-quoc.jpg', 4100, 950, NOW()
+),
+(
+    'Phố cổ Hội An lọt top điểm đến lãng mạn nhất thế giới', 
+    'Vẻ đẹp trầm mặc của những ngôi nhà vàng và đèn lồng lung linh đã chinh phục du khách.', 
+    '<p>Hội An về đêm mang một vẻ đẹp huyền bí, đặc biệt là hoạt động thả đèn hoa đăng trên sông Hoài...</p>', 
+    'Du lịch', 'hoi-an.jpg', 2800, 670, NOW()
+),
+
+-- THỂ THAO
+(
+    'Đội tuyển Việt Nam chốt danh sách dự Asian Cup', 
+    'Huấn luyện viên trưởng đã đưa ra những quyết định bất ngờ về nhân sự.', 
+    '<p>Sự vắng mặt của một số trụ cột do chấn thương đang để lại nhiều lo lắng cho người hâm mộ...</p>', 
+    'Thể thao', 'tuyen-viet-nam.jpg', 7800, 2100, NOW()
+),
+(
+    'Messi tiếp tục tỏa sáng tại giải nhà nghề Mỹ (MLS)', 
+    'Siêu sao người Argentina vừa lập cú đúp giúp Inter Miami lội ngược dòng ngoạn mục.', 
+    '<p>Dù đã lớn tuổi nhưng đẳng cấp của Leo Messi vẫn quá khác biệt so với phần còn lại của giải đấu...</p>', 
+    'Thể thao', 'messi-mls.jpg', 6500, 1800, NOW()
+),
+(
+    'Giải chạy Marathon TP.HCM thu hút 10.000 vận động viên', 
+    'Sự kiện thể thao cộng đồng lớn nhất năm đã diễn ra sôi nổi vào sáng nay.', 
+    '<p>Các vận động viên đã hoàn thành cung đường chạy qua các địa điểm biểu tượng của thành phố...</p>', 
+    'Thể thao', 'marathon-hcm.jpg', 1200, 300, NOW()
+),
+
+-- THỜI SỰ
+(
+    'Giá xăng dầu hôm nay: Tiếp tục giảm mạnh', 
+    'Tin vui cho người dân khi giá xăng E5 RON 92 giảm sâu trong kỳ điều chỉnh mới.', 
+    '<p>Liên Bộ Tài chính - Công Thương vừa công bố giá cơ sở mới, áp dụng từ 15h chiều nay...</p>', 
+    'Thời sự', 'gia-xang.jpg', 9000, 450, NOW()
+),
+(
+    'Dự báo thời tiết: Miền Bắc đón đợt không khí lạnh tăng cường', 
+    'Nhiệt độ tại các tỉnh miền núi phía Bắc có thể xuống dưới 10 độ C.', 
+    '<p>Người dân cần chủ động giữ ấm và bảo vệ gia súc, hoa màu trước đợt rét đậm rét hại này...</p>', 
+    'Thời sự', 'thoi-tiet.jpg', 5400, 200, NOW()
+),
+(
+    'Tiến độ dự án sân bay Long Thành đang được đẩy nhanh', 
+    'Các nhà thầu đang tập trung nhân lực và máy móc để thi công ngày đêm.', 
+    '<p>Gói thầu nhà ga hành khách đã bắt đầu lộ diện hình hài, dự kiến hoàn thành đúng tiến độ...</p>', 
+    'Thời sự', 'san-bay-long-thanh.jpg', 3100, 500, NOW()
+),
+
+-- ĐỜI SỐNG
+(
+    'Xu hướng sống tối giản của giới trẻ hiện nay', 
+    'Bỏ bớt đồ đạc, tập trung vào trải nghiệm đang là lối sống được Gen Z ưa chuộng.', 
+    '<p>Danshari hay phong cách Minimalism giúp giảm stress và tiết kiệm chi phí sinh hoạt đáng kể...</p>', 
+    'Đời sống', 'song-toi-gian.jpg', 2200, 400, NOW()
+),
+(
+    'Cách làm món thịt kho tàu chuẩn vị ngày Tết', 
+    'Bí quyết để thịt mềm, nước màu hổ phách đẹp mắt mà không cần dùng nước dừa.', 
+    '<p>Bước quan trọng nhất là ướp thịt và canh lửa sao cho mỡ trong veo, tan ngay trong miệng...</p>', 
+    'Đời sống', 'thit-kho-tau.jpg', 4500, 1100, NOW()
+),
+(
+    'Những loại cây cảnh lọc không khí tốt nhất cho văn phòng', 
+    'Cải thiện không gian làm việc với những chậu cây nhỏ xinh và dễ chăm sóc.', 
+    '<p>Cây lưỡi hổ, trầu bà, và lan ý là những lựa chọn hàng đầu để hấp thụ bức xạ máy tính...</p>', 
+    'Đời sống', 'cay-canh.jpg', 1800, 350, NOW()
+),
+(
+    'Review sách: "Muôn kiếp nhân sinh" - Bài học về luật nhân quả', 
+    'Tác phẩm của Nguyên Phong đã thức tỉnh nhiều độc giả về ý nghĩa cuộc sống.', 
+    '<p>Cuốn sách không chỉ là những câu chuyện tâm linh mà còn lồng ghép nhiều kiến thức lịch sử, khoa học...</p>', 
+    'Đời sống', 'muon-kiep-nhan-sinh.jpg', 2600, 780, NOW()
+),
+
+-- THÔNG BÁO
+(
+    'Thông báo lịch nghỉ Tết Nguyên Đán 2025', 
+    'Ban quản trị website xin thông báo đến quý độc giả và đối tác lịch nghỉ lễ chính thức.', 
+    '<p>Chúng tôi sẽ tạm ngưng hỗ trợ trực tuyến từ ngày 28 tháng Chạp đến hết mùng 5 Tết...</p>', 
+    'Thông báo', 'lich-nghi-tet.jpg', 10500, 150, NOW()
+),
+(
+    'Bảo trì hệ thống máy chủ định kỳ', 
+    'Để nâng cao trải nghiệm người dùng, chúng tôi sẽ tiến hành nâng cấp hệ thống vào cuối tuần này.', 
+    '<p>Thời gian bảo trì dự kiến từ 0h00 đến 4h00 sáng Chủ Nhật. Mong quý độc giả thông cảm...</p>', 
+    'Thông báo', 'bao-tri.jpg', 500, 10, NOW()
+),
+(
+    'Cảnh báo lừa đảo trực tuyến mạo danh ngân hàng', 
+    'Người dùng cần cảnh giác trước các tin nhắn SMS và email giả mạo yêu cầu cung cấp mã OTP.', 
+    '<p>Tuyệt đối không click vào các đường link lạ hoặc cung cấp thông tin tài khoản cho bất kỳ ai...</p>', 
+    'Thông báo', 'canh-bao-lua-dao.jpg', 7200, 2500, NOW()
 );
