@@ -262,3 +262,69 @@ h1, h2, h3 {
 #commentList .d-flex:hover {
     transform: translateX(10px); /* Trượt sang phải khi hover */
 }
+
+/* --- 8. PAGINATION (Thanh phân trang sành điệu) --- */
+.pagination {
+    gap: 12px; /* Khoảng cách giữa các nút */
+    padding: 20px 0;
+    align-items: center;
+}
+
+.page-link {
+    border: none !important;
+    border-radius: 50% !important; /* Biến nút thành hình tròn */
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-dark);
+    background-color: #fff;
+    
+    /* Hiệu ứng bóng đổ mềm */
+    box-shadow: 0 5px 15px rgba(183, 153, 255, 0.2);
+    
+    /* Animation mượt mà */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng khi di chuột (Hover) - Nảy lên và đổi màu */
+.page-link:hover {
+    transform: translateY(-8px) scale(1.1); /* Bay lên cao */
+    background-color: var(--color-accent); /* Màu xanh lơ */
+    color: #fff;
+    box-shadow: 0 15px 30px rgba(174, 226, 255, 0.6); /* Bóng đổ lớn hơn */
+}
+
+/* Trạng thái trang đang xem (Active) */
+.page-item.active .page-link {
+    /* Gradient Tím - Xanh */
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(183, 153, 255, 0.5);
+    transform: scale(1.2); /* To hơn các nút khác */
+    z-index: 2;
+}
+
+/* Trạng thái bị vô hiệu hóa (Disabled) - Nút mờ đi */
+.page-item.disabled .page-link {
+    background-color: rgba(255,255,255,0.5);
+    color: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Icon mũi tên điều hướng */
+.page-link i {
+    font-size: 0.9rem;
+    transition: transform 0.3s;
+}
+
+/* Mũi tên trượt khi hover */
+.page-link:hover .fa-chevron-right { transform: translateX(3px); }
+.page-link:hover .fa-chevron-left { transform: translateX(-3px); }

@@ -26,15 +26,15 @@ class AboutPage extends BasePage {
                                 <i class="fa-solid fa-database me-1"></i> MySQL
                             </span>
 
-                            <span class="badge bg-dark text-white p-2">
+                            <span class="badge bg-primary text-white p-2">
                                 <i class="fa-brands fa-html5 me-1"></i> HTML / CSS
                             </span>
 
-                            <span class="badge bg-info text-dark p-2 border border-info">
+                            <span class="badge bg-primary text-white p-2">
                                 <i class="fa-brands fa-bootstrap me-1"></i> Bootstrap
                             </span>
                             
-                            <span class="badge bg-warning text-dark p-2 border border-warning">
+                            <span class="badge bg-primary text-white p-2">
                                 <i class="fa-brands fa-js me-1"></i> jQuery
                             </span>
                         </div>

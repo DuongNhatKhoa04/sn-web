@@ -1,16 +1,26 @@
 <?php
-// 1. Nhúng các file cần thiết
 require_once 'classes/BasePage.php';
-require_once 'classes/Article.php'; // Load file Model xử lý dữ liệu
+require_once 'classes/Article.php';
 
 class HomePage extends BasePage {
     protected function renderBody() {
-        // 2. KHỞI TẠO MODEL & LẤY DỮ LIỆU
-        // (Thay vì viết câu lệnh SQL dài dòng ở đây, ta nhờ Model làm hộ)
+        // --- 1. XỬ LÝ PHÂN TRANG ---
+        $limit = 6; // Số bài hiển thị trên 1 trang
+        // Lấy trang hiện tại từ URL (ví dụ: index.php?page=2), mặc định là 1
+        $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        // Tính vị trí bắt đầu lấy dữ liệu (Offset)
+        $offset = ($currentPage - 1) * $limit;
+
+        // Gọi Model
         $articleModel = new Article();
-        $latestNews = $articleModel->getLatest(6); 
+        // Lấy danh sách bài viết cho trang hiện tại
+        $listArticles = $articleModel->getPaginated($limit, $offset);
+        // Tính tổng số trang
+        $totalArticles = $articleModel->getTotalCount();
+        $totalPages = ceil($totalArticles / $limit);
+
+        // --- 2. PHẦN GIAO DIỆN SLIDER (Giữ nguyên) ---
         ?>
-        
         <div class="row mb-5 align-items-center">
             <div class="col-lg-12">
                 <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -41,19 +51,11 @@ class HomePage extends BasePage {
 
         <div class="row">
         <?php
-            // Kiểm tra xem có bài viết nào không
-            if (!empty($latestNews)) {
-                
-                // Dùng vòng lặp foreach để duyệt qua mảng dữ liệu lấy từ Model
-                foreach ($latestNews as $row) {
-                    
-                    // 1. Tạo link chi tiết
+            if (count($listArticles) > 0) {
+                foreach ($listArticles as $row) {
                     $link = "pages/detail.php?id=" . $row['id'];
-                    
-                    // 2. Lấy ảnh (VẪN DÙNG HÀM CỦA BASEPAGE BÌNH THƯỜNG)
                     $img = $this->getImageUrl($row['image_url']);
                     
-                    // 3. Hiển thị HTML
                     echo '
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
@@ -85,11 +87,36 @@ class HomePage extends BasePage {
             }
         ?>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+        <nav aria-label="Page navigation" class="mt-5" style="animation: fadeInUp 1.2s ease-out;">
+            <ul class="pagination justify-content-center">
+                
+                <li class="page-item <?php echo ($currentPage <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $currentPage - 1; ?>">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
+                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?php echo ($currentPage >= $totalPages) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $currentPage + 1; ?>">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <?php endif; ?>
+
         <?php
     }
 }
 
-// Chạy trang
 $page = new HomePage("Trang chủ - SNews", true);
 $page->render();
 ?>
