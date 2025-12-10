@@ -62,7 +62,7 @@ class AboutPage extends BasePage {
                 <div class="card h-100 text-center p-4 border-0 hover-shadow" style="animation: fadeInUp 0.8s ease-out; animation-delay: 0.1s;">
                     <div class="position-relative mx-auto mb-4" style="width: 140px; height: 140px;">
                         <?php 
-                            $img1 = $this->getImageUrl("images/member1");
+                            $img1 = $this->getImageUrl("member1.webp");
                             // Fallback nếu hàm getImageUrl trả về placeholder mặc định mà mình muốn avatar khác
                             if(strpos($img1, 'placehold.co') !== false) {
                                 $img1 = "https://ui-avatars.com/api/?name=Nguyen+Van+A&background=6C5DD3&color=fff&size=150";
@@ -87,7 +87,7 @@ class AboutPage extends BasePage {
                 <div class="card h-100 text-center p-4 border-0 hover-shadow" style="animation: fadeInUp 0.8s ease-out; animation-delay: 0.3s;">
                     <div class="position-relative mx-auto mb-4" style="width: 140px; height: 140px;">
                         <?php 
-                            $img2 = $this->getImageUrl("images/member2.jpeg");
+                            $img2 = $this->getImageUrl("member2.jpeg");
                             if(strpos($img2, 'placehold.co') !== false) {
                                 $img2 = "https://ui-avatars.com/api/?name=Tran+Thi+B&background=FF758F&color=fff&size=150";
                             }
@@ -110,7 +110,7 @@ class AboutPage extends BasePage {
                 <div class="card h-100 text-center p-4 border-0 hover-shadow" style="animation: fadeInUp 0.8s ease-out; animation-delay: 0.5s;">
                     <div class="position-relative mx-auto mb-4" style="width: 140px; height: 140px;">
                         <?php 
-                            $img3 = $this->getImageUrl("images/member3.jpeg");
+                            $img3 = $this->getImageUrl("member3.jpeg");
                             if(strpos($img3, 'placehold.co') !== false) {
                                 $img3 = "https://ui-avatars.com/api/?name=Le+Van+C&background=00D2FF&color=fff&size=150";
                             }

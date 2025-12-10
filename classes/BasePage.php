@@ -14,33 +14,41 @@ abstract class BasePage {
         $this->db = $database->getConnection();
     }
 
-    // --- HÀM TẢI ẢNH THÔNG MINH (Smart Image Loader) ---
-    protected function getImageUrl($url) {
-        if (empty($url)) return "https://placehold.co/600x400/e9ecef/6c757d?text=No+Image";
+    // --- SMART IMAGE FINDER (Tu dong tim trong moi thu muc) ---
+    protected function getImageUrl($filename) {
+        // 1. Neu khong co ten file -> Tra ve anh Placeholder
+        if (empty($filename)) {
+            return "https://placehold.co/600x400/e9ecef/6c757d?text=No+Image";
+        }
 
-        // Danh sách các đuôi ảnh ưu tiên tìm kiếm
-        $extensions = ['', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
-        
-        // Đường dẫn thực tế trên ổ cứng (để kiểm tra file_exists)
-        $baseDir = __DIR__ . "/../"; 
-        
-        // Đường dẫn để hiển thị trên web
-        $webPath = $this->assets_folder;
+        // 2. Dinh nghia danh sach cac folder can tim quet (Uu tien tu trai qua phai)
+        // Ban co the them folder moi vao day
+        $searchFolders = [
+            'images/',          // Thu muc goc
+            'images/avatars/',  // Anh thanh vien
+            'images/banners/',  // Anh slider, quang cao
+            'images/posts/',    // Anh bai viet
+            'images/icons/'     // Icon neu co
+        ];
 
-        // Vòng lặp kiểm tra từng đuôi file
-        foreach ($extensions as $ext) {
-            // Thử ghép đuôi file vào (Ví dụ: images/anh1 + .png)
-            $tryPath = $url . $ext;
+        // Xu ly ten file (Loai bo duong dan cu neu lo nhap 'images/...')
+        $cleanName = basename($filename); 
+
+        // 3. Vong lap quet tung folder
+        foreach ($searchFolders as $folder) {
+            // Duong dan vat ly tren may (de kiem tra ton tai)
+            $physicalPath = __DIR__ . "/../" . $folder . $cleanName;
             
-            // Kiểm tra xem file có tồn tại trên ổ cứng không
-            if (file_exists($baseDir . $tryPath) && is_file($baseDir . $tryPath)) {
-                // Nếu tìm thấy, trả về đường dẫn tương đối cho Web
-                return $webPath . $tryPath;
+            // Duong dan URL (de hien thi tren web)
+            $webPath = $this->assets_folder . $folder . $cleanName;
+
+            if (file_exists($physicalPath)) {
+                return $webPath; // Tim thay thi tra ve luon
             }
         }
 
-        // Nếu dò hết các đuôi mà không thấy file nào, trả về ảnh mẫu online
-        return "https://placehold.co/600x400/e9ecef/6c757d?text=Image+Not+Found";
+        // 4. Neu tim het ma khong thay -> Tra ve Placeholder bao loi
+        return "https://placehold.co/600x400/ffcccc/ff0000?text=Not+Found:+" . $cleanName;
     }
 
     public function render() {
