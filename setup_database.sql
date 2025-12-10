@@ -61,11 +61,14 @@ CREATE TABLE banners (
 -- DỮ LIỆU MẪU (SEED DATA)
 -- =============================================
 
--- 1. Thêm Banner Slide
-INSERT INTO banners (image_url, title, display_order, is_active) VALUES 
-('https://placehold.co/1200x450/C4D9FF/ffffff?text=Chao+Mung+S-NEWS', 'Chào mừng S-NEWS', 1, TRUE),
-('https://placehold.co/1200x450/C5BAFF/ffffff?text=Tin+Cong+Nghe+Hot', 'Xu hướng Công nghệ 2025', 2, TRUE),
-('https://placehold.co/1200x450/FFC4D9/ffffff?text=Du+Lich+Viet+Nam', 'Khám phá Việt Nam', 3, TRUE);
+-- 1. Cập nhật Banner: Giới hạn 5 cái và trỏ link về bài viết
+INSERT INTO banners (image_url, title, link_url, display_order, is_active) VALUES 
+('https://placehold.co/1200x450/C4D9FF/ffffff?text=iPhone+16+Ra+Mat', 'Sự kiện Apple: iPhone 16 ra mắt', 'article_detail.php?id=1', 1, TRUE),
+('https://placehold.co/1200x450/C5BAFF/ffffff?text=AI+Thay+Doi+The+Gioi', 'Tương lai của AI và Chat GPT-5', 'article_detail.php?id=2', 2, TRUE),
+('https://placehold.co/1200x450/FFC4D9/ffffff?text=Son+Doong+Cave', 'Khám phá Sơn Đoòng - Quảng Bình', 'article_detail.php?id=4', 3, TRUE),
+('https://placehold.co/1200x450/FF9EAA/ffffff?text=Bong+Da+VN', 'Đội tuyển Việt Nam tại Asian Cup', 'article_detail.php?id=8', 4, TRUE),
+('https://placehold.co/1200x450/B5C0D0/ffffff?text=Gia+Xang+Giam', 'Tin vui: Giá xăng giảm mạnh', 'article_detail.php?id=11', 5, TRUE);
+-- Lưu ý: id=1, id=2... phải trùng với ID thật trong bảng articles của bạn
 
 -- 2. Thêm Danh mục (Có Icon và Màu sắc)
 INSERT INTO categories (name, icon, color) VALUES 

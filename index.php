@@ -4,7 +4,27 @@ require_once 'classes/Article.php';
 
 class HomePage extends BasePage {
     protected function renderBody() {
-        // 1. XỬ LÝ MODEL
+        // ============================================================
+        // 1. LOGIC PHP: LẤY DỮ LIỆU
+        // ============================================================
+        
+        // A. LẤY BANNER TỪ DATABASE (Code Mới thêm vào)
+        $banners = [];
+        try {
+            // Kết nối nhanh để lấy banner (sử dụng thông tin mặc định: root, rỗng)
+            $connBanner = new PDO("mysql:host=localhost;dbname=s_news_db;charset=utf8mb4", 'root', '');
+            $connBanner->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // Lấy 5 banner đang bật, sắp xếp theo thứ tự
+            $stmt = $connBanner->prepare("SELECT * FROM banners WHERE is_active = 1 ORDER BY display_order ASC LIMIT 5");
+            $stmt->execute();
+            $banners = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // Nếu lỗi kết nối thì để mảng rỗng, web vẫn chạy bình thường
+            $banners = [];
+        }
+
+        // B. LẤY DANH SÁCH BÀI VIẾT & PHÂN TRANG (Code Cũ của bạn)
         $limit = 6;
         $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $offset = ($currentPage - 1) * $limit;
@@ -17,22 +37,45 @@ class HomePage extends BasePage {
         
         <div class="row mb-5 align-items-center">
             <div class="col-lg-12">
-                <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <img src="https://placehold.co/1200x450/C4D9FF/ffffff?text=Chao+Mung+S-NEWS" class="d-block w-100" alt="Slide 1">
+                <?php if (!empty($banners)): ?>
+                    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
+                        
+                        <div class="carousel-indicators">
+                            <?php foreach ($banners as $i => $banner): ?>
+                                <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="<?= $i ?>" 
+                                        class="<?= ($i === 0) ? 'active' : '' ?>" aria-current="true"></button>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="carousel-item">
-                            <img src="https://placehold.co/1200x450/C5BAFF/ffffff?text=Tin+Tuc+Moi+Nhat" class="d-block w-100" alt="Slide 2">
+
+                        <div class="carousel-inner">
+                            <?php foreach ($banners as $index => $banner): ?>
+                                <div class="carousel-item <?= ($index === 0) ? 'active' : '' ?>">
+                                    <a href="<?= htmlspecialchars($banner['link_url']) ?>">
+                                        <img src="<?= htmlspecialchars($banner['image_url']) ?>" 
+                                             class="d-block w-100" 
+                                             style="height: 450px; object-fit: cover;" 
+                                             alt="<?= htmlspecialchars($banner['title']) ?>">
+                                        
+                                        <?php if (!empty($banner['title'])): ?>
+                                        <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.5); border-radius: 8px;">
+                                            <h5><?= htmlspecialchars($banner['title']) ?></h5>
+                                        </div>
+                                        <?php endif; ?>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon"></span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon"></span>
-                    </button>
-                </div>
+                <?php else: ?>
+                    <div class="alert alert-secondary text-center">Chưa có banner hiển thị.</div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -106,7 +149,7 @@ class HomePage extends BasePage {
             </ul>
         </nav>
         <?php endif; ?>
-
+        
         <?php
     }
 }
