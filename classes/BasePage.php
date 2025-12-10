@@ -22,13 +22,11 @@ abstract class BasePage {
         }
 
         // 2. Dinh nghia danh sach cac folder can tim quet (Uu tien tu trai qua phai)
-        // Ban co the them folder moi vao day
         $searchFolders = [
-            'images/',          // Thu muc goc
-            'images/avatars/',  // Anh thanh vien
-            'images/banners/',  // Anh slider, quang cao
-            'images/posts/',    // Anh bai viet
-            'images/icons/'     // Icon neu co
+            'images/',          
+            'images/avatars/',  
+            'images/banners/',  
+            'images/posts/',    
         ];
 
         // Xu ly ten file (Loai bo duong dan cu neu lo nhap 'images/...')
@@ -36,10 +34,10 @@ abstract class BasePage {
 
         // 3. Vong lap quet tung folder
         foreach ($searchFolders as $folder) {
-            // Duong dan vat ly tren may (de kiem tra ton tai)
+            // Duong dan vat ly (de kiem tra)
             $physicalPath = __DIR__ . "/../" . $folder . $cleanName;
             
-            // Duong dan URL (de hien thi tren web)
+            // Duong dan Web (de hien thi)
             $webPath = $this->assets_folder . $folder . $cleanName;
 
             if (file_exists($physicalPath)) {
@@ -47,8 +45,8 @@ abstract class BasePage {
             }
         }
 
-        // 4. Neu tim het ma khong thay -> Tra ve Placeholder bao loi
-        return "https://placehold.co/600x400/ffcccc/ff0000?text=Not+Found:+" . $cleanName;
+        // 4. Fallback: Tra ve anh bao loi neu khong tim thay o dau ca
+        return "https://placehold.co/600x400/ffcccc/ff0000?text=Not+Found";
     }
 
     public function render() {
