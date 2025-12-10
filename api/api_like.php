@@ -13,28 +13,30 @@ try {
     exit;
 }
 
-// Lấy dữ liệu JSON gửi lên
+// Lấy dữ liệu
 $data = json_decode(file_get_contents("php://input"), true);
 $articleId = isset($data['id']) ? (int)$data['id'] : 0;
-$action = isset($data['action']) ? $data['action'] : 'like'; // Nhận action: 'like' hoặc 'unlike'
+$action    = isset($data['action']) ? $data['action'] : 'like';
 
 if ($articleId > 0) {
     if ($action === 'unlike') {
-        // Giảm like (nhưng không giảm dưới 0)
-        // Cú pháp GREATEST(0, likes - 1) đảm bảo số like không bị âm
-        $stmt = $conn->prepare("UPDATE articles SET likes = GREATEST(0, likes - 1) WHERE id = :id");
+        // SỬA LỖI Ở ĐÂY: Chỉ trừ like nếu số like > 0 để tránh lỗi số âm
+        $stmt = $conn->prepare("UPDATE articles SET likes = likes - 1 WHERE id = :id AND likes > 0");
     } else {
         // Tăng like
         $stmt = $conn->prepare("UPDATE articles SET likes = likes + 1 WHERE id = :id");
     }
-    $stmt->execute([':id' => $articleId]);
+    
+    if ($stmt->execute([':id' => $articleId])) {
+        // Lấy số like mới để trả về
+        $stmt = $conn->prepare("SELECT likes FROM articles WHERE id = :id");
+        $stmt->execute([':id' => $articleId]);
+        $newCount = $stmt->fetchColumn();
 
-    // Lấy số like mới nhất để trả về cho giao diện
-    $stmt = $conn->prepare("SELECT likes FROM articles WHERE id = :id");
-    $stmt->execute([':id' => $articleId]);
-    $newCount = $stmt->fetchColumn();
-
-    echo json_encode(['success' => true, 'new_likes' => $newCount]);
+        echo json_encode(['success' => true, 'new_likes' => $newCount]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật DB']);
+    }
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid ID']);
 }
