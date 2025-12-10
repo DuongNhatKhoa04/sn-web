@@ -5,6 +5,10 @@ DROP DATABASE IF EXISTS s_news_db;
 CREATE DATABASE s_news_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE s_news_db;
 
+-- =============================================
+-- TẠO CẤU TRÚC BẢNG (SCHEMA)
+-- =============================================
+
 -- 3. TẠO BẢNG DANH MỤC (CATEGORIES) - MỚI
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,10 +24,15 @@ CREATE TABLE articles (
     summary TEXT,
     content LONGTEXT,
     image_url VARCHAR(255),
-    category VARCHAR(50) DEFAULT 'Tin tức', -- Cột này sẽ lưu tên danh mục
+    category VARCHAR(50), 
     views INT DEFAULT 0,
     likes INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Đánh index để tìm kiếm nhanh (Fulltext Search)
+    FULLTEXT (title, summary),
+    -- Đánh index để lọc danh mục nhanh
+    INDEX (category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. TẠO BẢNG BÌNH LUẬN (COMMENTS)
@@ -36,11 +45,29 @@ CREATE TABLE comments (
     FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 6. BẢNG BANNER (DYNAMIC SLIDER) - MỚI
+-- Giúp thay đổi banner mà không cần sửa code HTML
+CREATE TABLE banners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_url VARCHAR(255) NOT NULL,
+    title VARCHAR(100),           -- Tiêu đề trên ảnh
+    link_url VARCHAR(255),        -- Link khi click vào banner (tùy chọn)
+    display_order INT DEFAULT 0,  -- Thứ tự hiển thị
+    is_active BOOLEAN DEFAULT TRUE, -- 1: Hiện, 0: Ẩn
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =============================================
 -- DỮ LIỆU MẪU (SEED DATA)
 -- =============================================
 
--- 1. Thêm Danh mục (Có Icon và Màu sắc)
+-- 1. Thêm Banner Slide
+INSERT INTO banners (image_url, title, display_order, is_active) VALUES 
+('https://placehold.co/1200x450/C4D9FF/ffffff?text=Chao+Mung+S-NEWS', 'Chào mừng S-NEWS', 1, TRUE),
+('https://placehold.co/1200x450/C5BAFF/ffffff?text=Tin+Cong+Nghe+Hot', 'Xu hướng Công nghệ 2025', 2, TRUE),
+('https://placehold.co/1200x450/FFC4D9/ffffff?text=Du+Lich+Viet+Nam', 'Khám phá Việt Nam', 3, TRUE);
+
+-- 2. Thêm Danh mục (Có Icon và Màu sắc)
 INSERT INTO categories (name, icon, color) VALUES 
 ('Thời sự', 'fa-solid fa-newspaper', 'text-primary'),
 ('Công nghệ', 'fa-solid fa-microchip', 'text-info'),
@@ -49,7 +76,7 @@ INSERT INTO categories (name, icon, color) VALUES
 ('Thể thao', 'fa-solid fa-futbol', 'text-danger'),
 ('Du lịch', 'fa-solid fa-plane', 'text-primary');
 
--- 2. Thêm Bài viết mẫu
+-- 3. Thêm Bài viết mẫu
 INSERT INTO articles (title, summary, content, category, image_url, views, likes, created_at) VALUES 
 -- CÔNG NGHỆ
 (
