@@ -1,4 +1,5 @@
 <?php
+// File: pages/detail.php
 require_once '../classes/BasePage.php';
 
 class DetailPage extends BasePage {
@@ -14,11 +15,11 @@ class DetailPage extends BasePage {
             return;
         }
 
-        // Tang view
+        // Tăng view
         $this->db->query("UPDATE articles SET views = views + 1 WHERE id = $id");
-        $img = $this->getImageUrl($article['image_url']);
+        $img = $this->getImageUrl($article['image_url']); // Hàm này xử lý đường dẫn ảnh
         
-        // Lay Comments
+        // Lấy Comments
         $cmtStmt = $this->db->prepare("SELECT * FROM comments WHERE article_id = ? ORDER BY created_at DESC");
         $cmtStmt->execute([$id]);
         $comments = $cmtStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -37,11 +38,20 @@ class DetailPage extends BasePage {
                 <div class="text-muted mb-4 border-bottom pb-3">
                     <i class="fa-regular fa-clock"></i> <?php echo date('d/m/Y', strtotime($article['created_at'])); ?> 
                     <span class="mx-2">|</span> 
-                    <i class="fa-regular fa-eye"></i> <?php echo $article['views']; ?> lượt xem
+                    <i class="fa-regular fa-eye"></i> <?php echo $article['views']; ?> xem
+                    
+                    <span class="mx-2">|</span>
+                    <span class="text-danger fw-bold">
+                        <i class="fa-solid fa-heart"></i> <span id="likeCount"><?php echo isset($article['likes']) ? $article['likes'] : 0; ?></span> thích
+                    </span>
                 </div>
 
-                <div class="text-center mb-4">
+                <div class="text-center mb-4 position-relative">
                     <img src="<?php echo $img; ?>" class="img-fluid rounded shadow" alt="Minh hoa">
+                    
+                    <button id="btnLike" class="btn btn-danger position-absolute bottom-0 end-0 m-3 rounded-pill shadow" data-id="<?php echo $id; ?>">
+                        <i class="fa-regular fa-thumbs-up"></i> Thả tim
+                    </button>
                 </div>
 
                 <div class="article-content fs-5" style="line-height: 1.8; text-align: justify;">
@@ -57,9 +67,8 @@ class DetailPage extends BasePage {
             <div class="col-lg-8">
                 <div class="bg-white p-4 rounded shadow-sm">
                     <h4 class="mb-4">Bình luận (<span id="cmtCount"><?php echo count($comments); ?></span>)</h4>
-                    
                     <form id="commentForm" class="mb-5">
-                        <input type="hidden" id="article_id" value="<?php echo $id; ?>">
+                         <input type="hidden" id="article_id" value="<?php echo $id; ?>">
                         <div class="mb-3">
                             <input type="text" id="username" class="form-control" placeholder="Tên của bạn" required>
                         </div>
@@ -86,6 +95,42 @@ class DetailPage extends BasePage {
                 </div>
             </div>
         </div>
+
+        <script>
+        $(document).ready(function(){
+            $('#btnLike').click(function(){
+                var articleId = $(this).data('id');
+                var btn = $(this);
+                
+                // Hiệu ứng bấm nút
+                btn.prop('disabled', true); 
+
+                $.ajax({
+                    url: '../api/api_like.php', // Đảm bảo đường dẫn đúng tới file api bạn đã tạo
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ id: articleId }),
+                    success: function(response){
+                        if(response.success){
+                            // Cập nhật số like mới
+                            $('#likeCount').text(response.new_likes);
+                            btn.html('<i class="fa-solid fa-check"></i> Đã thích');
+                            btn.removeClass('btn-danger').addClass('btn-success');
+                        } else {
+                            alert('Lỗi: ' + (response.message || 'Không thể like'));
+                            btn.prop('disabled', false);
+                        }
+                    },
+                    error: function(){
+                        alert('Có lỗi xảy ra khi kết nối server');
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+            
+            // Code xử lý comment cũ của bạn có thể để ở đây...
+        });
+        </script>
         <?php
     }
 }
