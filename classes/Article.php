@@ -35,10 +35,22 @@ class Article {
         return $row['total'];
     }
 
-    // 3. Tìm kiếm
+    // 3. Tìm kiếm (Cập nhật để lấy thêm thông tin danh mục)
     public function search($keyword) {
-        $stmt = $this->db->prepare("SELECT * FROM articles WHERE title LIKE :key OR summary LIKE :key");
-        $stmt->execute([':key' => "%$keyword%"]);
+        // Sử dụng % để tìm kiếm gần đúng (LIKE)
+        $keyword = "%$keyword%";
+        
+        $sql = "SELECT a.*, 
+                       c.name as cat_name, 
+                       c.icon as cat_icon, 
+                       c.color as cat_color 
+                FROM articles a 
+                LEFT JOIN categories c ON a.category = c.name 
+                WHERE a.title LIKE :key OR a.summary LIKE :key
+                ORDER BY a.created_at DESC";
+                
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':key' => $keyword]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     

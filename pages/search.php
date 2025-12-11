@@ -1,121 +1,148 @@
 <?php
-// Lưu ý: Đường dẫn require cần chỉnh lại vì file này nằm trong thư mục pages/
 require_once '../classes/BasePage.php';
-require_once '../classes/Database.php';
+require_once '../classes/Article.php';
 
 class SearchPage extends BasePage {
     protected function renderBody() {
-        $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
-        $page    = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-        $limit   = 5; 
-        $offset  = ($page - 1) * $limit;
-
-        $db = new Database();
-        $conn = $db->getConnection();
+        // Lấy từ khóa từ URL
+        $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
         
-        $articles = [];
-        $totalRecords = 0;
-        $totalPages = 0;
+        echo '<div class="mb-4">';
+        echo '<h2 class="fw-bold">Kết quả tìm kiếm cho: "<span class="text-primary">' . htmlspecialchars($keyword) . '</span>"</h2>';
+        echo '</div>';
 
-        if ($keyword) {
-            // 1. Tìm kiếm + Phân trang
-            $sql = "SELECT * FROM articles 
-                    WHERE title LIKE :kw OR summary LIKE :kw 
-                    ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':kw', "%$keyword%", PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
-            $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // 2. Đếm tổng
-            $sqlCount = "SELECT COUNT(*) FROM articles WHERE title LIKE :kw OR summary LIKE :kw";
-            $stmtCount = $conn->prepare($sqlCount);
-            $stmtCount->bindValue(':kw', "%$keyword%", PDO::PARAM_STR);
-            $stmtCount->execute();
-            $totalRecords = $stmtCount->fetchColumn();
-            $totalPages = ceil($totalRecords / $limit);
+        if (empty($keyword)) {
+            echo '<div class="alert alert-warning">Vui lòng nhập từ khóa để tìm kiếm.</div>';
+            return;
         }
-        ?>
 
-        <div class="container py-4">
-            <form action="search.php" method="GET" class="mb-5 shadow-sm p-4 bg-white rounded">
-                <div class="input-group input-group-lg">
-                    <input type="text" name="q" class="form-control border-primary" 
-                           placeholder="Nhập từ khóa tìm kiếm..." value="<?= htmlspecialchars($keyword) ?>">
-                    <button class="btn btn-primary px-4" type="submit">
-                        <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm kiếm
-                    </button>
-                </div>
-            </form>
+        // Gọi hàm search mới trong Article
+        $articleModel = new Article();
+        $results = $articleModel->search($keyword);
 
-            <h4 class="mb-4">Kết quả tìm kiếm: "<strong><?= htmlspecialchars($keyword) ?></strong>" <small class="text-muted">(<?= $totalRecords ?> bài)</small></h4>
+        echo '<div class="row">';
+        if (!empty($results)) {
+            foreach ($results as $row) {
+                $link = "detail.php?id=" . $row['id'];
+                $img = $this->getImageUrl($row['image_url']);
+                $likes = isset($row['likes']) ? $row['likes'] : 0;
 
-            <div class="list-group list-group-flush">
-                <?php if (count($articles) > 0): ?>
-                    <?php foreach ($articles as $row): 
-                        $likes = isset($row['likes']) ? $row['likes'] : 0;
-                    ?>
-                        <div class="list-group-item border-0 shadow-sm mb-3 rounded p-3">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <img src="../<?= htmlspecialchars($row['image_url'] ?? 'images/no-image.jpg') ?>" 
-                                         class="img-fluid rounded" style="width:100%; height:150px; object-fit:cover;">
-                                </div>
-                                <div class="col-md-9 d-flex flex-column">
-                                    <div class="d-flex justify-content-between">
-                                        <h5 class="mb-1 fw-bold">
-                                            <a href="detail.php?id=<?= $row['id'] ?>" class="text-decoration-none text-dark">
-                                                <?= htmlspecialchars($row['title']) ?>
-                                            </a>
-                                        </h5>
-                                        <small class="text-muted"><?= date('d/m/Y', strtotime($row['created_at'])) ?></small>
-                                    </div>
-                                    <p class="mb-2 text-muted"><?= htmlspecialchars($row['summary']) ?></p>
-                                    
-                                    <div class="mt-auto d-flex align-items-center gap-3">
-                                        <span class="badge bg-light text-dark border"><?= htmlspecialchars($row['category']) ?></span>
-                                        
-                                        <button class="btn btn-sm btn-outline-danger border-0 like-btn" 
-                                                onclick="toggleLike(this, <?= $row['id'] ?>)">
-                                            <i class="fa-regular fa-heart"></i> 
-                                            <span class="like-count"><?= $likes ?></span>
-                                        </button>
-                                        
-                                        <a href="detail.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary ms-auto">Xem chi tiết</a>
-                                    </div>
+                // XỬ LÝ TAG DANH MỤC (Giống trang chủ)
+                $catName = !empty($row['cat_name']) ? $row['cat_name'] : $row['category'];
+                $catIcon = !empty($row['cat_icon']) ? $row['cat_icon'] : 'fa-solid fa-folder';
+                $colorClass = !empty($row['cat_color']) ? $row['cat_color'] : 'text-primary';
+                $bgClass = str_replace('text-', 'bg-', $colorClass); 
+
+                echo '
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="overflow-hidden" style="height: 200px;">
+                            <a href="'.$link.'"><img src="'.$img.'" class="card-img-top h-100 w-100" style="object-fit: cover;"></a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge '.$bgClass.' bg-opacity-10 text-dark border border-'.$colorClass.'">
+                                        <i class="'.$catIcon.' me-1 '.$colorClass.'"></i> '.$catName.'
+                                    </span>
+                                    <small class="text-muted ms-2"><i class="fa-regular fa-clock"></i> '.date('d/m', strtotime($row['created_at'])).'</small>
                                 </div>
                             </div>
+                            
+                            <h5 class="card-title"><a href="'.$link.'" class="text-decoration-none text-dark fw-bold">'.$row['title'].'</a></h5>
+                            <p class="card-text text-muted small flex-grow-1">'.substr($row['summary'], 0, 90).'...</p>
+                            
+                            <div class="mt-3 d-flex justify-content-between align-items-center border-top pt-3">
+                                <button class="btn btn-outline-danger btn-sm border-0 like-btn" onclick="toggleLikeDetail(this, '.$row['id'].')">
+                                    <i class="fa-regular fa-heart"></i> <span class="like-count fw-bold ms-1">'.$likes.'</span>
+                                </button>
+                                <a href="'.$link.'" class="btn btn-primary btn-sm rounded-pill px-3">Xem <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                            </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php elseif ($keyword): ?>
-                    <div class="alert alert-warning text-center">Không tìm thấy bài viết nào phù hợp.</div>
-                <?php endif; ?>
-            </div>
+                    </div>
+                </div>';
+            }
+        } else {
+            echo '<div class="col-12 text-center py-5 text-muted">
+                    <i class="fa-solid fa-magnifying-glass fa-3x mb-3 text-secondary"></i>
+                    <h4>Không tìm thấy bài viết nào phù hợp.</h4>
+                    <p>Hãy thử tìm với từ khóa khác nhé!</p>
+                  </div>';
+        }
+        echo '</div>';
+        
+        // --- JAVASCRIPT XỬ LÝ LIKE CHO TRANG SEARCH ---
+        // (Logic giống hệt trang detail vì cùng nằm trong thư mục pages/)
+        ?>
+        <script>
+        const STORAGE_KEY_SEARCH = 'snews_liked_final'; 
 
-            <?php if ($totalPages > 1): ?>
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page - 1 ?>">Trước</a>
-                    </li>
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                            <a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $i ?>"><?= $i ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?q=<?= urlencode($keyword) ?>&page=<?= $page + 1 ?>">Sau</a>
-                    </li>
-                </ul>
-            </nav>
-            <?php endif; ?>
-        </div>
+        function toggleLikeDetail(btn, articleId) {
+            var $btn = $(btn);
+            var rawList = JSON.parse(localStorage.getItem(STORAGE_KEY_SEARCH) || '[]');
+            var likedList = rawList.map(Number);
+            articleId = parseInt(articleId);
+
+            var isLiked = likedList.includes(articleId);
+            var action = isLiked ? 'unlike' : 'like';
+            var currentCount = parseInt($btn.find('.like-count').text()) || 0;
+
+            if (action === 'like') {
+                $btn.removeClass('btn-outline-danger').addClass('btn-danger');
+                $btn.find('i').removeClass('fa-regular').addClass('fa-solid');
+                $btn.css('color', 'white');
+                $btn.find('.like-count').text(currentCount + 1);
+            } else {
+                $btn.removeClass('btn-danger').addClass('btn-outline-danger');
+                $btn.find('i').removeClass('fa-solid').addClass('fa-regular');
+                $btn.css('color', '');
+                $btn.find('.like-count').text(Math.max(0, currentCount - 1));
+            }
+
+            if (action === 'like') {
+                if (!likedList.includes(articleId)) likedList.push(articleId);
+            } else {
+                likedList = likedList.filter(id => id !== articleId);
+            }
+            localStorage.setItem(STORAGE_KEY_SEARCH, JSON.stringify(likedList));
+
+            $.ajax({
+                url: '../api/api_like.php', // Dùng ../ vì ở trong pages/
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: articleId, action: action }),
+                success: function(response) {
+                    if (response.success) {
+                        $btn.find('.like-count').text(response.new_likes);
+                    }
+                }
+            });
+        }
+
+        // Tự động tô màu nút Like khi load trang
+        $(document).ready(function() {
+            var likedList = JSON.parse(localStorage.getItem(STORAGE_KEY_SEARCH) || '[]').map(Number);
+            $('.like-btn').each(function() {
+                var onclickVal = $(this).attr('onclick'); 
+                if (onclickVal) {
+                    var match = onclickVal.match(/\d+/);
+                    if (match) {
+                        var id = parseInt(match[0]);
+                        if (likedList.includes(id)) {
+                            var $btn = $(this);
+                            $btn.removeClass('btn-outline-danger').addClass('btn-danger');
+                            $btn.find('i').removeClass('fa-regular').addClass('fa-solid');
+                            $btn.css('color', 'white');
+                        }
+                    }
+                }
+            });
+        });
+        </script>
         <?php
     }
 }
 
-$page = new SearchPage("Tìm kiếm - SNews", true);
+$page = new SearchPage("Tìm kiếm");
 $page->render();
 ?>
