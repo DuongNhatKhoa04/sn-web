@@ -63,7 +63,6 @@ class AboutPage extends BasePage {
                     <div class="position-relative mx-auto mb-4" style="width: 140px; height: 140px;">
                         <?php 
                             $img1 = $this->getImageUrl("member1.webp");
-                            // Fallback nếu hàm getImageUrl trả về placeholder mặc định mà mình muốn avatar khác
                             if(strpos($img1, 'placehold.co') !== false) {
                                 $img1 = "https://ui-avatars.com/api/?name=Nguyen+Van+A&background=6C5DD3&color=fff&size=150";
                             }

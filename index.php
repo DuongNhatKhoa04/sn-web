@@ -76,7 +76,7 @@ class HomePage extends BasePage {
                 // XỬ LÝ TAG DANH MỤC
                 $catName = !empty($row['cat_name']) ? $row['cat_name'] : $row['category'];
                 $catIcon = !empty($row['cat_icon']) ? $row['cat_icon'] : 'fa-solid fa-folder';
-                $colorClass = !empty($row['cat_color']) ? $row['cat_color'] : 'text-primary';
+                $colorClass = 'text-light';
                 // Tạo background nhạt dựa trên màu chữ (Thay text- bằng bg-)
                 $bgClass = str_replace('text-', 'bg-', $colorClass); 
 

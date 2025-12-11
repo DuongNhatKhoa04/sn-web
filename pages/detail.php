@@ -26,7 +26,7 @@ class DetailPage extends BasePage {
         // Dữ liệu Tag danh mục (Fallback nếu null)
         $catName = !empty($article['cat_name']) ? $article['cat_name'] : $article['category'];
         $catIcon = !empty($article['cat_icon']) ? $article['cat_icon'] : 'fa-solid fa-folder';
-        $colorClass = !empty($article['cat_color']) ? $article['cat_color'] : 'text-primary';
+        $colorClass = 'text-light';
         $bgClass = str_replace('text-', 'bg-', $colorClass); 
 
         // Lấy Bình luận
@@ -47,7 +47,7 @@ class DetailPage extends BasePage {
                 <h1 class="fw-bold mb-3 display-5 animate__animated animate__fadeInUp"><?php echo htmlspecialchars($article['title']); ?></h1>
                 
                 <div class="d-flex align-items-center mb-4 border-bottom pb-3 text-muted animate__animated animate__fadeInUp delay-1">
-                    <span class="badge <?php echo $bgClass; ?> bg-opacity-25 text-dark border border-<?php echo $colorClass; ?> me-3 px-3 py-2 rounded-pill">
+                    <span class="badge <?php echo $bgClass; ?> text-white border-0 me-3 px-3 py-2 rounded-pill shadow-sm">
                         <i class="<?php echo $catIcon; ?> me-1 <?php echo $colorClass; ?>"></i> <?php echo $catName; ?>
                     </span>
                     <div class="me-3"><i class="fa-regular fa-clock me-1"></i> <?php echo date('d/m/Y', strtotime($article['created_at'])); ?></div>
