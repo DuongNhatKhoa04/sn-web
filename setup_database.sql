@@ -66,7 +66,7 @@ CREATE TABLE banners (
 
 -- 1. Thêm Banner mẫu
 INSERT INTO banners (image_url, title, link_url, display_order, is_active) VALUES 
-('https://placehold.co/1200x450/C4D9FF/ffffff?text=iPhone+16+Ra+Mat', 'Sự kiện Apple: iPhone 16 ra mắt', 'pages/detail.php?id=1', 1, TRUE),
+('images/posts/iphone-16.jpg', 'Sự kiện Apple: iPhone 16 ra mắt', 'pages/detail.php?id=1', 1, TRUE),
 ('https://placehold.co/1200x450/C5BAFF/ffffff?text=AI+Thay+Doi+The+Gioi', 'Tương lai của AI và Chat GPT-5', 'pages/detail.php?id=2', 2, TRUE),
 ('https://placehold.co/1200x450/FFC4D9/ffffff?text=Son+Doong+Cave', 'Khám phá Sơn Đoòng - Quảng Bình', 'pages/detail.php?id=4', 3, TRUE),
 ('https://placehold.co/1200x450/FF9EAA/ffffff?text=Bong+Da+VN', 'Đội tuyển Việt Nam tại Asian Cup', 'pages/detail.php?id=8', 4, TRUE),
