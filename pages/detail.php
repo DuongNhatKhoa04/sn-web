@@ -1,35 +1,37 @@
 <?php
 require_once '../classes/BasePage.php';
-// --- SỬA LỖI: Nhúng file Article.php ngay tại đây ---
+// Nhúng file Article.php để lấy dữ liệu bài viết
 require_once '../classes/Article.php'; 
 
 class DetailPage extends BasePage {
     protected function renderBody() {
+        // Lấy ID bài viết từ đường dẫn (VD: detail.php?id=5)
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
-        // Khởi tạo Model
+        // Khởi tạo Model và tìm bài viết theo ID
         $articleModel = new Article();
         $article = $articleModel->getById($id);
 
+        // Nếu không tìm thấy bài nào thì báo lỗi
         if (!$article) {
             echo '<div class="alert alert-danger text-center my-5">Bài viết không tồn tại!</div>';
             return;
         }
 
-        // Tăng view mỗi khi vào xem
+        // Tự động tăng lượt xem (views) lên 1 đơn vị
         $this->db->query("UPDATE articles SET views = views + 1 WHERE id = $id");
         
-        // Xử lý dữ liệu hiển thị
+        // Chuẩn bị dữ liệu để hiển thị
         $img = $this->getImageUrl($article['image_url']);
         $likes = isset($article['likes']) ? $article['likes'] : 0;
         
-        // Dữ liệu Tag danh mục (Fallback nếu null)
+        // Xử lý hiển thị danh mục
         $catName = !empty($article['cat_name']) ? $article['cat_name'] : $article['category'];
         $catIcon = !empty($article['cat_icon']) ? $article['cat_icon'] : 'fa-solid fa-folder';
         $colorClass = 'text-light';
         $bgClass = str_replace('text-', 'bg-', $colorClass); 
 
-        // Lấy Bình luận
+        // Lấy danh sách bình luận của bài viết này
         $cmtStmt = $this->db->prepare("SELECT * FROM comments WHERE article_id = ? ORDER BY created_at DESC");
         $cmtStmt->execute([$id]);
         $comments = $cmtStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -148,6 +150,7 @@ class DetailPage extends BasePage {
             }
             localStorage.setItem(STORAGE_KEY_DETAIL, JSON.stringify(likedList));
 
+            // Gửi API
             $.ajax({
                 url: '../api/api_like.php',
                 type: 'POST',
@@ -161,6 +164,7 @@ class DetailPage extends BasePage {
             });
         }
 
+        // Hàm thay đổi giao diện nút Like (Tô màu/Bỏ màu)
         function updateDetailBtnUI($btn, isLiked) {
             var $icon = $btn.find('i');
             var $text = $btn.find('#textLike');
@@ -178,6 +182,7 @@ class DetailPage extends BasePage {
             }
         }
 
+        // Kiểm tra like khi vừa vào trang
         $(document).ready(function() {
             var likedList = JSON.parse(localStorage.getItem(STORAGE_KEY_DETAIL) || '[]').map(Number);
             var articleId = <?php echo $id; ?>;

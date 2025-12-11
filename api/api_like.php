@@ -13,22 +13,22 @@ try {
     exit;
 }
 
-// Lấy dữ liệu
+// Lấy dữ liệu JSON gửi lên từ Javascript
 $data = json_decode(file_get_contents("php://input"), true);
 $articleId = isset($data['id']) ? (int)$data['id'] : 0;
 $action    = isset($data['action']) ? $data['action'] : 'like';
 
 if ($articleId > 0) {
     if ($action === 'unlike') {
-        // SỬA LỖI Ở ĐÂY: Chỉ trừ like nếu số like > 0 để tránh lỗi số âm
+        // Nếu là "Bỏ thích": Trừ đi 1, nhưng chỉ trừ nếu số like đang lớn hơn 0 (tránh số âm)
         $stmt = $conn->prepare("UPDATE articles SET likes = likes - 1 WHERE id = :id AND likes > 0");
     } else {
-        // Tăng like
+        // Nếu là "Thích": Tăng lên 1
         $stmt = $conn->prepare("UPDATE articles SET likes = likes + 1 WHERE id = :id");
     }
     
     if ($stmt->execute([':id' => $articleId])) {
-        // Lấy số like mới để trả về
+        // Sau khi cập nhật xong, lấy lại số like mới nhất để gửi về cho giao diện hiển thị
         $stmt = $conn->prepare("SELECT likes FROM articles WHERE id = :id");
         $stmt->execute([':id' => $articleId]);
         $newCount = $stmt->fetchColumn();

@@ -1,27 +1,30 @@
 <?php
 abstract class BasePage {
-    protected $title;
-    protected $db;
-    protected $assets_folder; // Dùng để xác định vị trí file (./ hoặc ../)
+    protected $title; // Tiêu đề của trang (hiện trên tab trình duyệt)
+    protected $db;    // Biến để dùng kết nối cơ sở dữ liệu
+    protected $assets_folder; // Đường dẫn để tìm file ảnh/css (tránh lỗi khi ở thư mục con)
 
+    // Hàm khởi tạo: Chạy đầu tiên khi trang web được bật lên
     public function __construct($title = "S-News", $is_root = false) {
         $this->title = $title;
+        // Nếu là trang chủ (root) thì đường dẫn rỗng, nếu là trang con thì phải lùi ra ngoài 1 cấp (../)
         $this->assets_folder = $is_root ? "" : "../";
         
-        // Tu dong ket noi Database
+        // Tự động gọi file Database.php để kết nối dữ liệu ngay lập tức
         require_once __DIR__ . '/Database.php';
         $database = new Database();
         $this->db = $database->getConnection();
     }
 
-    // --- SMART IMAGE FINDER (Tu dong tim trong moi thu muc) ---
+    // --- CÔNG CỤ TÌM ẢNH THÔNG MINH ---
+    // Giúp tìm ảnh trong nhiều thư mục khác nhau, nếu không thấy thì hiện ảnh lỗi (màu xám)
     protected function getImageUrl($filename) {
-        // 1. Neu khong co ten file -> Tra ve anh Placeholder
+        // 1. Nếu không có tên file -> Trả về ảnh giữ chỗ màu xám (Placeholder)
         if (empty($filename)) {
             return "https://placehold.co/600x400/e9ecef/6c757d?text=No+Image";
         }
 
-        // 2. Dinh nghia danh sach cac folder can tim quet (Uu tien tu trai qua phai)
+        // 2. Danh sách các ngăn tủ (thư mục) cần lục lọi để tìm ảnh
         $searchFolders = [
             'images/',          
             'images/avatars/',  
@@ -29,40 +32,43 @@ abstract class BasePage {
             'images/posts/',    
         ];
 
-        // Xu ly ten file (Loai bo duong dan cu neu lo nhap 'images/...')
+        // Làm sạch tên file (chỉ lấy tên, bỏ đường dẫn thừa nếu có)
         $cleanName = basename($filename); 
 
-        // 3. Vong lap quet tung folder
+        // 3. Đi từng ngăn tủ để tìm
         foreach ($searchFolders as $folder) {
-            // Duong dan vat ly (de kiem tra)
+            // Đường dẫn thực tế trên máy tính (để kiểm tra xem file có tồn tại không)
             $physicalPath = __DIR__ . "/../" . $folder . $cleanName;
             
-            // Duong dan Web (de hien thi)
+            // Đường dẫn web (để hiển thị cho người dùng xem)
             $webPath = $this->assets_folder . $folder . $cleanName;
 
+            // Nếu tìm thấy file thật -> Trả về đường dẫn ngay
             if (file_exists($physicalPath)) {
-                return $webPath; // Tim thay thi tra ve luon
+                return $webPath; 
             }
         }
 
-        // 4. Fallback: Tra ve anh bao loi neu khong tim thay o dau ca
+        // 4. Tìm khắp nơi không thấy -> Trả về ảnh báo lỗi màu đỏ
         return "https://placehold.co/600x400/ffcccc/ff0000?text=Not+Found";
     }
 
+    // Hàm chính: Vẽ ra toàn bộ trang web theo thứ tự Đầu -> Thân -> Chân
     public function render() {
         echo '<!DOCTYPE html><html lang="vi">';
-        $this->renderHead();
+        $this->renderHead(); // Vẽ phần khai báo (CSS, Font chữ...)
         echo '<body class="bg-light d-flex flex-column min-vh-100">';
-        $this->renderHeader();
+        $this->renderHeader(); // Vẽ thanh Menu (Navbar)
         
         echo '<main class="flex-shrink-0"><div class="container py-4">';
-        $this->renderBody(); 
+        $this->renderBody(); // Vẽ phần nội dung chính (Cái này các trang con sẽ tự vẽ riêng)
         echo '</div></main>';
         
-        $this->renderFooter();
+        $this->renderFooter(); // Vẽ chân trang (Footer)
         echo '</body></html>';
     }
 
+    // Vẽ phần <head>: Chứa các thư viện như Bootstrap, FontAwesome, CSS riêng
     protected function renderHead() {
         ?>
         <head>
@@ -79,6 +85,7 @@ abstract class BasePage {
         <?php
     }
 
+    // Vẽ thanh Menu điều hướng (Navbar) ở trên cùng
     protected function renderHeader() {
         $root = $this->assets_folder;
         ?>
@@ -97,20 +104,21 @@ abstract class BasePage {
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mx-auto">
-                        
                         <li class="nav-item"><a class="nav-link" href="<?php echo $root; ?>index.php">Trang chủ</a></li>
                         
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Danh mục</a>
                             <ul class="dropdown-menu border-0 shadow-lg rounded-3 overflow-hidden animate__animated animate__fadeInUp">
                                 <?php
-                                // Kết nối DB lấy danh mục
+                                // Kết nối vào DB để lấy danh sách các danh mục (Thể thao, Đời sống...)
                                 $stmtCat = $this->db->prepare("SELECT * FROM categories");
                                 $stmtCat->execute();
                                 $categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
 
+                                // Nếu có danh mục thì in ra từng dòng
                                 if(count($categories) > 0) {
                                     foreach($categories as $cat) {
+                                        // Tạo đường dẫn bấm vào sẽ nhảy sang trang category.php
                                         $catLink = $root . 'pages/category.php?cat=' . urlencode($cat['name']);
                                         echo '<li>
                                             <a class="dropdown-item" href="'.$catLink.'">
@@ -142,6 +150,7 @@ abstract class BasePage {
         <?php
     }
 
+    // Vẽ chân trang (Footer) chứa bản quyền và nhúng file Javascript
     protected function renderFooter() {
         ?>
         <footer class="footer mt-auto py-3 bg-dark text-white text-center">
@@ -155,6 +164,7 @@ abstract class BasePage {
         <?php
     }
 
+    // Hàm trừu tượng: Bắt buộc các trang con (như Trang chủ, Chi tiết) phải tự viết nội dung cho hàm này
     abstract protected function renderBody();
 }
 ?>

@@ -6,7 +6,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@300;400;500&display=swap');
 
 :root {
-    /* Bảng màu Truyền thông: Tím Đậm - Hồng Neon - Xanh Dương */
+    /* KHAI BÁO BẢNG MÀU DÙNG CHUNG */
+    /* Thay đổi mã màu ở đây sẽ đổi màu toàn bộ web */
     --color-primary: #6C5DD3;      /* Tím chủ đạo */
     --color-secondary: #FF758F;    /* Hồng tạo điểm nhấn */
     --color-accent: #00D2FF;       /* Xanh sáng */
@@ -14,7 +15,7 @@
     --text-dark: #1A1D23;          /* Chữ đen đậm */
     --text-gray: #64748B;          /* Chữ xám */
     
-    --card-shadow: 0 10px 30px rgba(108, 93, 211, 0.15);
+    --card-shadow: 0 10px 30px rgba(108, 93, 211, 0.15); /* Bóng đổ của thẻ */
     --hover-shadow: 0 20px 40px rgba(108, 93, 211, 0.25);
 }
 
@@ -26,6 +27,7 @@ body {
 }
 
 /* --- 0. CÁC HIỆU ỨNG ANIMATION (KEYFRAMES) --- */
+/* Định nghĩa cách các vật thể chuyển động */
 
 /* Hiệu ứng trượt từ dưới lên */
 @keyframes fadeInUp {
@@ -56,7 +58,7 @@ body {
 /* --- 1. NAVBAR (Thanh menu Glassmorphism) --- */
 .navbar {
     background: rgba(255, 255, 255, 0.9) !important; /* Nền trắng mờ */
-    backdrop-filter: blur(10px); /* Hiệu ứng kính mờ (Blur) */
+    backdrop-filter: blur(10px); /* Hiệu ứng kính mờ (Blur) giống iPhone */
     box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
     padding: 15px 0;
     animation: fadeInUp 0.8s ease-out; /* Navbar trượt xuống khi load */
@@ -120,7 +122,7 @@ body {
     animation: fadeInUp 0.8s both;
 }
 
-/* Tạo độ trễ (delay) cho từng card để chúng hiện lần lượt */
+/* Tạo độ trễ (delay) cho từng card để chúng hiện lần lượt, tạo cảm giác mượt mà */
 .col-md-4:nth-child(1) .card { animation-delay: 0.1s; }
 .col-md-4:nth-child(2) .card { animation-delay: 0.3s; }
 .col-md-4:nth-child(3) .card { animation-delay: 0.5s; }
@@ -155,6 +157,7 @@ body {
     color: var(--text-dark);
     font-weight: 700;
     text-decoration: none;
+    /* Hiệu ứng gạch chân bằng màu gradient */
     background-image: linear-gradient(to right, var(--color-primary) 0%, var(--color-secondary) 100%);
     background-size: 0% 2px;
     background-repeat: no-repeat;
@@ -167,7 +170,7 @@ body {
     background-size: 100% 2px; /* Gạch chân chạy từ trái qua phải */
 }
 
-/* Badge (Thẻ danh mục) */
+/* Badge (Thẻ danh mục nhỏ trên bài viết) */
 .badge {
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent)) !important;
     border-radius: 30px;

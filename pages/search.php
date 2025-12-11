@@ -4,7 +4,7 @@ require_once '../classes/Article.php';
 
 class SearchPage extends BasePage {
     protected function renderBody() {
-        // Lấy từ khóa từ URL
+        // Lấy từ khóa người dùng nhập vào
         $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
         
         echo '<div class="mb-4">';
@@ -16,18 +16,19 @@ class SearchPage extends BasePage {
             return;
         }
 
-        // Gọi hàm search mới trong Article
+        // Gọi hàm search trong Article.php để tìm trong DB
         $articleModel = new Article();
         $results = $articleModel->search($keyword);
 
         echo '<div class="row">';
         if (!empty($results)) {
             foreach ($results as $row) {
+                // ... (Phần hiển thị này giống hệt trang chủ: Tạo thẻ Card, hiển thị ảnh, tiêu đề) ...
                 $link = "detail.php?id=" . $row['id'];
                 $img = $this->getImageUrl($row['image_url']);
                 $likes = isset($row['likes']) ? $row['likes'] : 0;
 
-                // XỬ LÝ TAG DANH MỤC (Giống trang chủ)
+                // XỬ LÝ TAG DANH MỤC
                 $catName = !empty($row['cat_name']) ? $row['cat_name'] : $row['category'];
                 $catIcon = !empty($row['cat_icon']) ? $row['cat_icon'] : 'fa-solid fa-folder';
                 $colorClass = !empty($row['cat_color']) ? $row['cat_color'] : 'text-primary';
@@ -63,6 +64,7 @@ class SearchPage extends BasePage {
                 </div>';
             }
         } else {
+            // Nếu không tìm thấy gì thì hiện thông báo buồn
             echo '<div class="col-12 text-center py-5 text-muted">
                     <i class="fa-solid fa-magnifying-glass fa-3x mb-3 text-secondary"></i>
                     <h4>Không tìm thấy bài viết nào phù hợp.</h4>
@@ -78,6 +80,7 @@ class SearchPage extends BasePage {
         const STORAGE_KEY_SEARCH = 'snews_liked_final'; 
 
         function toggleLikeDetail(btn, articleId) {
+            // ... (Code xử lý Like giống các trang khác) ...
             var $btn = $(btn);
             var rawList = JSON.parse(localStorage.getItem(STORAGE_KEY_SEARCH) || '[]');
             var likedList = rawList.map(Number);
