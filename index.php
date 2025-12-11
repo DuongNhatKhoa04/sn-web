@@ -4,11 +4,7 @@ require_once 'classes/Article.php';
 
 class HomePage extends BasePage {
     protected function renderBody() {
-        // ============================================================
-        // 1. LẤY DỮ LIỆU
-        // ============================================================
-        
-        // A. Banner
+        // A. LẤY BANNER
         $banners = [];
         try {
             $connBanner = new PDO("mysql:host=localhost;dbname=s_news_db;charset=utf8mb4", 'root', '');
@@ -18,7 +14,7 @@ class HomePage extends BasePage {
             $banners = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) { $banners = []; }
 
-        // B. Bài viết
+        // B. LẤY BÀI VIẾT
         $limit = 6;
         $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
         $offset = ($currentPage - 1) * $limit;
@@ -77,6 +73,13 @@ class HomePage extends BasePage {
                 $img = $this->getImageUrl($row['image_url']);
                 $likes = isset($row['likes']) ? $row['likes'] : 0;
                 
+                // XỬ LÝ TAG DANH MỤC
+                $catName = !empty($row['cat_name']) ? $row['cat_name'] : $row['category'];
+                $catIcon = !empty($row['cat_icon']) ? $row['cat_icon'] : 'fa-solid fa-folder';
+                $colorClass = !empty($row['cat_color']) ? $row['cat_color'] : 'text-primary';
+                // Tạo background nhạt dựa trên màu chữ (Thay text- bằng bg-)
+                $bgClass = str_replace('text-', 'bg-', $colorClass); 
+
                 echo '
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0">
@@ -84,14 +87,22 @@ class HomePage extends BasePage {
                             <a href="'.$link.'"><img src="'.$img.'" class="card-img-top h-100 w-100" style="object-fit: cover;"></a>
                         </div>
                         <div class="card-body d-flex flex-column">
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge '.$bgClass.' bg-opacity-10 '.$colorClass.'">
+                                        <i class="'.$catIcon.' me-1"></i> '.$catName.'
+                                    </span>
+                                    <small class="text-muted ms-2"><i class="fa-regular fa-clock"></i> '.date('d/m', strtotime($row['created_at'])).'</small>
+                                </div>
+                            </div>
+                            
                             <h5 class="card-title"><a href="'.$link.'" class="text-decoration-none text-dark fw-bold">'.$row['title'].'</a></h5>
                             <p class="card-text text-muted small flex-grow-1">'.substr($row['summary'], 0, 90).'...</p>
+                            
                             <div class="mt-3 d-flex justify-content-between align-items-center border-top pt-3">
-                                
                                 <button class="btn btn-outline-danger btn-sm border-0 like-btn" onclick="toggleLike(this, '.$row['id'].')">
                                     <i class="fa-regular fa-heart"></i> <span class="like-count fw-bold ms-1">'.$likes.'</span>
                                 </button>
-
                                 <a href="'.$link.'" class="btn btn-primary btn-sm rounded-pill px-3">Xem <i class="fa-solid fa-arrow-right ms-1"></i></a>
                             </div>
                         </div>
@@ -100,7 +111,7 @@ class HomePage extends BasePage {
             }
         } ?>
         </div>
-        
+
         <?php if ($totalPages > 1): ?>
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
@@ -114,38 +125,32 @@ class HomePage extends BasePage {
         <?php endif; ?>
 
         <script>
-        // Key lưu trữ riêng biệt
-        const STORAGE_KEY = 'snews_liked_v3'; 
+        const STORAGE_KEY = 'snews_liked_final'; 
 
         function toggleLike(btn, articleId) {
             var $btn = $(btn);
-            
-            // 1. Xác định trạng thái hiện tại từ LocalStorage
             var rawList = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            var likedList = rawList.map(Number); // Chuyển về số
+            var likedList = rawList.map(Number);
             articleId = parseInt(articleId);
 
             var isLiked = likedList.includes(articleId);
             var action = isLiked ? 'unlike' : 'like';
-
-            // 2. CẬP NHẬT UI NGAY LẬP TỨC (Không chờ Server, không Disable nút)
             var currentCount = parseInt($btn.find('.like-count').text()) || 0;
             
+            // Cập nhật UI ngay lập tức
             if (action === 'like') {
-                // Hiệu ứng Like
                 $btn.removeClass('btn-outline-danger').addClass('btn-danger');
                 $btn.find('i').removeClass('fa-regular').addClass('fa-solid');
                 $btn.css('color', 'white');
                 $btn.find('.like-count').text(currentCount + 1);
             } else {
-                // Hiệu ứng Unlike
                 $btn.removeClass('btn-danger').addClass('btn-outline-danger');
                 $btn.find('i').removeClass('fa-solid').addClass('fa-regular');
                 $btn.css('color', '');
                 $btn.find('.like-count').text(Math.max(0, currentCount - 1));
             }
 
-            // 3. Cập nhật LocalStorage NGAY (để nếu user bấm nhanh quá vẫn ăn logic)
+            // Lưu LocalStorage ngay
             if (action === 'like') {
                 if (!likedList.includes(articleId)) likedList.push(articleId);
             } else {
@@ -153,7 +158,7 @@ class HomePage extends BasePage {
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(likedList));
 
-            // 4. Gửi Request ngầm
+            // Gửi API
             $.ajax({
                 url: 'api/api_like.php',
                 type: 'POST',
@@ -161,20 +166,12 @@ class HomePage extends BasePage {
                 data: JSON.stringify({ id: articleId, action: action }),
                 success: function(response) {
                     if (response.success) {
-                        // Đồng bộ lại số like chuẩn từ server
                         $btn.find('.like-count').text(response.new_likes);
-                    } else {
-                        // Nếu server lỗi -> Rollback UI (rất hiếm khi xảy ra)
-                        console.error('API Error');
                     }
-                },
-                error: function() {
-                    console.error('Network Error');
                 }
             });
         }
 
-        // Tự động tô màu khi load trang
         $(document).ready(function() {
             var likedList = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').map(Number);
             $('.like-btn').each(function() {
