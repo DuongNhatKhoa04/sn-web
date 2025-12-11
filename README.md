@@ -1,105 +1,171 @@
-# S-NEWS: WEBSITE TIN TỨC SINH VIÊN
+# TÀI LIỆU KỸ THUẬT & HƯỚNG DẪN SỬ DỤNG S-NEWS
 
-![Version](https://img.shields.io/badge/Version-1.0%20(Offline)-blue)
-![Environment](https://img.shields.io/badge/Server-WAMP%20Port%208080-green)
-![Tech](https://img.shields.io/badge/Tech-PHP%20OOP%20|%20MySQL-orange)
+## 1. Cấu Trúc Thư Mục (Project Structure)
 
-## 1. TỔNG QUAN DỰ ÁN
+Sau khi chạy tool cài đặt và chép mã nguồn, dự án sẽ nằm tại: `C:\xampp\htdocs\s-news` với cấu trúc như sau:
 
-### 1.1. Giới thiệu
-**S-News (Student News)** là hệ thống website tin tức cơ bản, được xây dựng nhằm phục vụ nhu cầu cập nhật thông tin học đường và xã hội cho sinh viên. Dự án được phát triển với mục tiêu tối ưu hóa khả năng đọc hiểu mã nguồn, dễ dàng bảo trì và hoạt động hoàn toàn trong môi trường mạng nội bộ (Offline/Localhost).
-
-### 1.2. Phạm vi yêu cầu
-* **Mô hình triển khai:** Web Application chạy trên Localhost.
-* **Yêu cầu kỹ thuật:** Không phụ thuộc Internet (Thư viện Bootstrap/jQuery được tải về máy).
-* **Công nghệ:**
-    * PHP Thuần (theo mô hình OOP).
-    * MySQL (Cơ sở dữ liệu).
-    * HTML5 / CSS3 / jQuery / Bootstrap 5.
-
----
-
-## 2. KIẾN TRÚC HỆ THỐNG
-
-### 2.1. Sơ đồ Cấu trúc & Nguyên lý hoạt động
-Hệ thống sử dụng mô hình **Page Controller** kết hợp **Template Method Pattern**.
-
-* **Lớp `BasePage` (Abstract):** Đóng vai trò là khung sườn (Template). Nó định nghĩa cấu trúc chuẩn của một trang web (gồm Header - Body - Footer).
-* **Các trang con (`pages/*.php`):** Kế thừa từ `BasePage` và chỉ tập trung xử lý nội dung riêng biệt (phần Body).
-
-### 2.2. Cơ sở dữ liệu (Database Schema)
-* **Tên CSDL:** `s_news_db`
-* **Bảng chính:** `articles`
-
-| Tên trường | Kiểu dữ liệu | Mô tả |
-| :--- | :--- | :--- |
-| `id` | `INT` (PK) | Mã bài viết (Tự tăng) |
-| `title` | `VARCHAR(255)` | Tiêu đề bài viết |
-| `summary` | `TEXT` | Tóm tắt ngắn gọn |
-| `content` | `TEXT` | Nội dung chi tiết bài viết |
-| `image_url` | `VARCHAR(255)` | Đường dẫn hình ảnh minh họa |
-| `category` | `VARCHAR(50)` | Danh mục (Thời sự, Công nghệ...) |
-| `views` | `INT` | Số lượt xem |
-| `likes` | `INT` | Số lượt thích |
+```text
+s-news/
+├── api/                        # Xử lý AJAX (Bình luận, Like)
+│   ├── add_comment.php         # API xử lý thêm bình luận
+│   └── api_like.php            # API xử lý lượt thích
+├── classes/                    # Các lớp xử lý chính (OOP)
+│   ├── Article.php             # Xử lý bài viết
+│   ├── BasePage.php            # Lớp giao diện cha
+│   └── Database.php            # Kết nối CSDL
+├── css/                        # Style giao diện (style.css)
+├── images/                     # Kho ảnh (Quan trọng: Bỏ ảnh đúng folder)
+│   ├── avatars/                # Ảnh đại diện thành viên (cho trang About)
+│   ├── banners/                # Ảnh banner slider (cho trang chủ)
+│   └── posts/                  # Ảnh thumbnail bài viết
+├── js/                         # Script xử lý frontend (main.js)
+├── pages/                      # Các trang con
+│   ├── about.php               # Trang giới thiệu (Cần sửa code để thay nội dung)
+│   ├── category.php            # Trang danh mục
+│   ├── detail.php              # Trang chi tiết bài viết
+│   └── search.php              # Trang tìm kiếm
+├── vendor/                     # Thư viện (Tự động tải bởi download.cmd)
+│   ├── bootstrap/              # Bootstrap 5.3.2
+│   ├── fontawesome/            # FontAwesome 6.4.2
+│   └── jquery/                 # jQuery 3.7.1
+├── index.php                   # Trang chủ
+├── setup_database.sql          # File khởi tạo CSDL
+├── setup-solution.cmd          # Script tạo folder dự án & tải thư viện
+├── download.cmd                # Script hỗ trợ tải file
+└── README.md                   # Tài liệu hướng dẫn này
+```
 
 ---
 
-## 3. THIẾT KẾ KỸ THUẬT & OOP
+## 2. Cơ Sở Dữ Liệu (Database Schema)
 
-### 3.1. Class Database (`classes/Database.php`)
-* **Nhiệm vụ:** Đóng gói việc kết nối tới MySQL.
-* **Lợi ích:** Tăng tính bảo mật và dễ bảo trì. Nếu thay đổi mật khẩu hoặc tên Database, chỉ cần sửa duy nhất file này.
-* **Nguyên lý:** Đơn nhiệm (Single Responsibility Principle).
+Dưới đây là mô tả các bảng dữ liệu và LƯU Ý QUAN TRỌNG khi nhập liệu để tránh lỗi web.
 
-### 3.2. Class BasePage (`classes/BasePage.php`)
-* **Nhiệm vụ:**
-    * Tự động sinh mã HTML cho Header (Menu) và Footer.
-    * Tự động nhúng file CSS/JS từ thư mục `vendor/` (chế độ Offline).
-    * Tự động xử lý đường dẫn tương đối (`../` hoặc `./`) tùy vị trí file gọi nó.
-* **Lợi ích:** Giúp giao diện đồng nhất tuyệt đối trên tất cả các trang.
+### 2.1. Bảng `banners` (Slider trang chủ)
+
+- Chức năng: Quản lý ảnh chạy slide ở trang chủ.
+
+Lưu ý nhập liệu:
+
+- `image_url`: Điền **tên file ảnh** (VD: `banner1.jpg`). Ảnh phải có trong `images/banners/`.
+- `link_url`: **BẮT BUỘC** phải đúng định dạng:  
+  `pages/detail.php?id=[id bài post]`  
+  Ví dụ: `pages/detail.php?id=15` (Trỏ về bài viết có ID là `15`).
+
+### 2.2. Bảng `articles` (Bài viết)
+
+- Chức năng: Chứa nội dung tin tức.
+
+Lưu ý nhập liệu:
+
+- `image_url`: Điền **tên file ảnh** (VD: `tin-moi.jpg`). Ảnh phải có trong `images/posts/`.
+- `category`: Tên danh mục (VD: `"Thể thao"`). **Phải trùng khớp** với tên trong bảng `categories`.
+
+### 2.3. Bảng `categories` (Danh mục)
+
+- Chức năng: Quản lý các thể loại tin.
+
+Lưu ý nhập liệu:
+
+- `icon`: Dùng class FontAwesome (VD: `fa-solid fa-futbol`).
+- `color`: Dùng class màu Bootstrap (VD: `text-danger`, `text-primary`).
+
+### 2.4. Bảng `comments` (Bình luận)
+
+- Chức năng: Lưu trữ bình luận của người dùng (thường được thêm tự động từ giao diện web).
 
 ---
 
-## 4. PHÂN CÔNG CHỨC NĂNG (TEAMWORK)
+## 3. Hướng Dẫn Cài Đặt (Installation Guide)
 
-| Thành viên | UI Phụ trách | Chức năng chi tiết |
-| :--- | :--- | :--- |
-| **Thành viên 1** | **Search** & **Category** | - Xử lý tìm kiếm SQL: `WHERE title LIKE %key%` <br> - Hiển thị danh sách tin theo danh mục. |
-| **Thành viên 2** | **Detail** & **Contact** | - Hiển thị chi tiết bài viết theo ID. <br> - Xử lý form bình luận bằng jQuery (Client-side). |
-| **Thành viên 3** | **Index** & **About** | - Tích hợp Slider chạy ảnh (Offline). <br> - Hiển thị tin mới nhất trang chủ. <br> - Thiết lập cấu trúc dự án ban đầu. |
+Vui lòng làm theo đúng thứ tự các bước sau:
+
+### Bước 1: Tải và Cài đặt XAMPP
+
+- Tải XAMPP 8.0.30 (**bắt buộc đúng phiên bản**).
+- Gợi ý: Tìm bản `XAMPP Windows x64 8.0.30` trên trang chủ Apache Friends.
+- Cài đặt xong, **chưa cần bật server** vội.
+
+### Bước 2: Chạy Script khởi tạo
+
+1. Để 2 file `setup-solution.cmd` và `download.cmd` chung một thư mục bất kỳ.
+2. Chạy file `setup-solution.cmd`.
+3. Đợi script chạy xong.  
+   Script sẽ tự động:
+   - Tạo thư mục `C:\xampp\htdocs\s-news`
+   - Tải các thư viện cần thiết (Bootstrap, jQuery, FontAwesome).
+
+### Bước 3: Copy Mã nguồn
+
+1. Giải nén file code của bạn.
+2. Copy toàn bộ nội dung (các file `.php`, folder `css`, `images`, `js`...)  
+   và dán vào thư mục:  
+   `C:\xampp\htdocs\s-news`
+3. Chọn **"Replace" (Ghi đè)** nếu được hỏi.
+
+### Bước 4: Khởi động Server
+
+1. Mở **XAMPP Control Panel**.
+2. Bấm **Start** dòng `Apache`.
+3. Bấm **Start** dòng `MySQL`.
+
+### Bước 5: Nhập Cơ sở dữ liệu (Import Database)
+
+1. Mở trình duyệt vào: `http://localhost/phpmyadmin/index.php`
+2. Bấm **New (Mới)** ở cột trái, tạo database tên: `s_news_db`.
+3. Chọn database vừa tạo, bấm tab **Import (Nhập)**.
+4. Bấm **Choose File**, chọn file `setup_database.sql` trong thư mục  
+   `C:\xampp\htdocs\s-news`.
+5. Bấm **Import** (hoặc **Go**) ở cuối trang.
+
+### Bước 6: Hoàn tất
+
+- Truy cập: `http://localhost/s-news/` để sử dụng.
 
 ---
 
-## 5. HƯỚNG DẪN CÀI ĐẶT & VẬN HÀNH
+## 4. Hướng Dẫn Chỉnh Sửa Nội Dung
 
-Do dự án được đặt tại ổ **D:** và chạy chế độ **Offline**, vui lòng tuân thủ quy trình sau:
+### 4.1. Chỉnh sửa trang Giới thiệu (About)
 
-### Bước 1: Chuẩn bị Môi trường
-1. Cài đặt **WampServer 3** (phiên bản 64-bit).
-2. Cấu hình WAMP chạy **Port 8080**:
-   * Mở file `httpd.conf` trong Apache.
-   * Đổi `Listen 80` thành `Listen 8080`.
-   * Đổi `ServerName localhost:80` thành `ServerName localhost:8080`.
+Nội dung trang About **không nằm trong Database** mà nằm trong file code.
 
-### Bước 2: Cài đặt Mã nguồn
-1. Chạy file script khởi tạo tự động (nếu có) tại `D:\s-news`.
-2. **Quan trọng (Offline Mode):** Tải các thư viện sau và đặt vào thư mục `vendor/` theo đúng cấu trúc:
-   * `vendor/bootstrap/css/bootstrap.min.css`
-   * `vendor/bootstrap/js/bootstrap.bundle.min.js`
-   * `vendor/jquery/jquery.min.js`
+- File cần sửa: `pages/about.php`  
+  (Dùng Notepad++ hoặc VS Code để mở).
 
-### Bước 3: Cấu hình Alias (Bắt buộc cho ổ D:)
-Vì WAMP cài ở ổ C nhưng code nằm ở ổ D, cần tạo Alias:
-1. Click chuột trái icon WAMP -> **Apache** -> **Alias directories** -> **Add an alias**.
-2. Nhập tên alias: `s-news`
-3. Nhập đường dẫn: `D:/s-news/`
+#### Cách thay đổi ảnh thành viên
 
-### Bước 4: Cấu hình Database
-1. Truy cập: `http://localhost:8080/phpmyadmin`
-2. Chọn tab **Import**.
-3. Chọn file `setup_database.sql` nằm trong thư mục dự án (`D:\s-news\`).
-4. Nhấn **Go** để khởi tạo bảng và dữ liệu mẫu.
+1. Tìm đoạn:  
+   `getImageUrl("tên-file-cũ.jpg")`
+2. Sửa thành tên ảnh của bạn, ví dụ:  
+   `getImageUrl("hinh-moi.png")` (nhớ kèm đuôi file).
+3. Lưu ý: Ảnh phải bỏ vào thư mục: `images/avatars/`.
 
-### Bước 5: Chạy ứng dụng
-Mở trình duyệt và truy cập:
-> **http://localhost:8080/s-news/**
+#### Cách thay đổi thông tin
+
+- Tìm và sửa trực tiếp các đoạn văn bản:
+  - Tên (VD: `Nguyen Van A`)
+  - Vai trò (VD: `Developer`)
+- Sửa phần nhiệm vụ trong các thẻ `<li>...</li>`  
+  (Nên tóm tắt thành **3 mục** cho đẹp).
+
+---
+
+### 4.2. Quản lý Bài viết & Banner (Qua phpMyAdmin)
+
+- Truy cập: `http://localhost/phpmyadmin/index.php`
+- Chọn database: `s_news_db`.
+
+#### Thêm mới
+
+1. Chọn bảng (`articles`, `banners`...).
+2. Chọn tab **Insert (Chèn)**.
+3. Điền thông tin.
+4. Bấm **Go** để lưu.
+
+#### Sửa / Xóa
+
+1. Chọn bảng.
+2. Chọn tab **Browse (Duyệt)**.
+3. Tìm dòng cần chỉnh.
+4. Bấm **Edit (Sửa)** hoặc **Delete (Xóa)**.
