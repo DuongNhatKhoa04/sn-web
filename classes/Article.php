@@ -6,29 +6,28 @@ class Article {
 
     // Khi khởi tạo, tự động kết nối với Database
     public function __construct() {
+        // Đảm bảo kết nối đúng kiểu new Database()
         $this->db = (new Database())->getConnection();
     }
 
     // 1. Lấy danh sách bài viết theo trang (Phân trang)
-    // $limit: Lấy bao nhiêu bài? $offset: Bỏ qua bao nhiêu bài đầu?
     public function getPaginated($limit, $offset) {
-        // Câu lệnh SQL: Lấy bài viết (articles) VÀ kèm theo thông tin icon/màu sắc từ bảng danh mục (categories)
-        // LEFT JOIN giống như việc dán nhãn màu lên bìa sách dựa theo thể loại sách
+        // --- SỬA LỖI Ở ĐÂY ---
+        // Thay vì: ON a.category = c.name
+        // Sửa thành: ON a.category_id = c.category_id
         $sql = "SELECT a.*, 
                        c.name as cat_name, 
                        c.icon as cat_icon, 
                        c.color as cat_color 
                 FROM articles a 
-                LEFT JOIN categories c ON a.category = c.name 
+                LEFT JOIN categories c ON a.category_id = c.category_id 
                 ORDER BY a.created_at DESC 
                 LIMIT :limit OFFSET :offset";
                 
         $stmt = $this->db->prepare($sql);
-        // Gán giá trị số lượng và vị trí bắt đầu
         $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
         $stmt->execute();
-        // Trả về danh sách kết quả
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -41,15 +40,16 @@ class Article {
 
     // 3. Tìm kiếm bài viết theo từ khóa
     public function search($keyword) {
-        // Thêm dấu % vào trước và sau để tìm kiếm tương đối (ví dụ: tìm "phố" sẽ ra "thành phố")
         $keyword = "%$keyword%";
         
+        // --- SỬA LỖI Ở ĐÂY ---
+        // Cập nhật câu JOIN theo ID
         $sql = "SELECT a.*, 
                        c.name as cat_name, 
                        c.icon as cat_icon, 
                        c.color as cat_color 
                 FROM articles a 
-                LEFT JOIN categories c ON a.category = c.name 
+                LEFT JOIN categories c ON a.category_id = c.category_id 
                 WHERE a.title LIKE :key OR a.summary LIKE :key
                 ORDER BY a.created_at DESC";
                 
@@ -60,12 +60,14 @@ class Article {
     
     // 4. Lấy chi tiết một bài viết cụ thể dựa vào ID
     public function getById($id) {
+        // --- SỬA LỖI Ở ĐÂY ---
+        // Cập nhật câu JOIN theo ID
         $sql = "SELECT a.*, 
                        c.name as cat_name, 
                        c.icon as cat_icon, 
                        c.color as cat_color 
                 FROM articles a 
-                LEFT JOIN categories c ON a.category = c.name 
+                LEFT JOIN categories c ON a.category_id = c.category_id 
                 WHERE a.id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);

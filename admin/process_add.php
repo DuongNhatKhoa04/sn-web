@@ -3,39 +3,46 @@
 require_once '../classes/Database.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $conn = Database::getInstance()->getConnection();
+    
+    // 1. Kết nối CSDL (Sửa lỗi getInstance cũ)
+    $db = new Database();
+    $conn = $db->getConnection();
 
-    // Lấy dữ liệu văn bản
+    // 2. Lấy dữ liệu từ form
     $title = $_POST['title'];
     $cat_id = $_POST['category_id'];
     $summary = $_POST['summary'];
-    $content = $_POST['content']; // Dữ liệu HTML từ CKEditor gửi sang
-    $author_id = 1; // Mặc định admin
+    $content = $_POST['content']; 
+    $author_id = 1; // Giả định ID admin là 1
 
-    // --- PHẦN XỬ LÝ UPLOAD ẢNH (BẮT BUỘC ĐỂ CÓ ĐIỂM) ---
+    // 3. XỬ LÝ UPLOAD ẢNH
     $imageUrl = '';
     
-    // Kiểm tra xem người dùng có chọn file không
+    // Kiểm tra có file được gửi lên không
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $uploadDir = '../images/posts/'; // Thư mục lưu ảnh
+        // Tạo thư mục nếu chưa có
+        $uploadDir = '../images/posts/';
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
         
-        // Tạo tên file mới ngẫu nhiên để tránh trùng (VD: post_6512a...jpg)
+        // Tạo tên file mới ngẫu nhiên để tránh trùng
         $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $newFileName = uniqid('post_') . '.' . $extension;
         $targetFile = $uploadDir . $newFileName;
 
-        // Di chuyển file từ bộ nhớ tạm vào thư mục images/posts
+        // Di chuyển file vào thư mục đích
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            // Lưu đường dẫn vào biến để lát insert vào DB
+            // Lưu đường dẫn tương đối để insert vào DB
             $imageUrl = 'images/posts/' . $newFileName; 
         } else {
-            die("Lỗi: Không thể lưu file ảnh lên server.");
+            die("<h3 style='color:red'>Lỗi: Không thể lưu file ảnh! Kiểm tra quyền ghi thư mục.</h3>");
         }
     } else {
-        die("Lỗi: Vui lòng chọn ảnh đại diện.");
+        die("<h3 style='color:red'>Lỗi: Vui lòng chọn ảnh đại diện.</h3>");
     }
 
-    // --- PHẦN INSERT VÀO DATABASE (BẢNG ARTICLES) ---
+    // 4. INSERT VÀO DATABASE
     try {
         $sql = "INSERT INTO articles (title, category_id, summary, content, image_url, author_id, created_at, views) 
                 VALUES (:t, :c, :s, :content, :img, :auth, NOW(), 0)";
@@ -45,16 +52,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':t' => $title,
             ':c' => $cat_id,
             ':s' => $summary,
-            ':content' => $content, // Lưu cả mã HTML của CKEditor vào DB
-            ':img' => $imageUrl,    // Lưu đường dẫn ảnh (VD: images/posts/abc.jpg)
+            ':content' => $content,
+            ':img' => $imageUrl,
             ':auth' => $author_id
         ]);
 
         // Thông báo thành công và quay về trang chủ
-        echo "<script>alert('Đã thêm bài viết thành công!'); window.location.href='../index.php';</script>";
+        echo "<script>
+            alert('Đã thêm bài viết thành công!'); 
+            window.location.href='../index.php';
+        </script>";
 
     } catch (PDOException $e) {
-        echo "Lỗi Insert: " . $e->getMessage();
+        echo "<h3 style='color:red'>Lỗi Insert CSDL: " . $e->getMessage() . "</h3>";
     }
 }
 ?>

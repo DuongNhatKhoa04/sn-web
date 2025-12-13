@@ -3,13 +3,27 @@ require_once '../classes/BasePage.php';
 
 class CategoryPage extends BasePage {
     protected function renderBody() {
-        // Lấy tên danh mục từ URL (VD: category.php?cat=TheThao)
-        $cat = isset($_GET['cat']) ? $_GET['cat'] : 'Thời sự';
-        echo '<h2 class="mb-4 border-bottom pb-2">Chuyên mục: <span class="text-success">'.htmlspecialchars($cat).'</span></h2>';
+        // Lấy tên danh mục từ URL (VD: category.php?cat=Thể Thao)
+        // Nếu không có thì mặc định là rỗng
+        $catName = isset($_GET['cat']) ? $_GET['cat'] : '';
+
+        if (empty($catName)) {
+            echo '<div class="alert alert-danger">Không tìm thấy danh mục yêu cầu.</div>';
+            return;
+        }
+
+        echo '<h2 class="mb-4 border-bottom pb-2">Chuyên mục: <span class="text-success">'.htmlspecialchars($catName).'</span></h2>';
         
-        // Lấy các bài viết có category trùng với yêu cầu
-        $stmt = $this->db->prepare("SELECT * FROM articles WHERE category = ? ORDER BY created_at DESC");
-        $stmt->execute([$cat]);
+        // --- SỬA LỖI Ở ĐÂY ---
+        // Code cũ: SELECT * FROM articles WHERE category = ? (Sai vì không còn cột category)
+        // Code mới: JOIN bảng categories để tìm theo TÊN danh mục
+        $sql = "SELECT a.* FROM articles a
+                JOIN categories c ON a.category_id = c.category_id
+                WHERE c.name = :name
+                ORDER BY a.created_at DESC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':name' => $catName]);
         
         echo '<div class="row">';
         if($stmt->rowCount() > 0) {
@@ -19,21 +33,30 @@ class CategoryPage extends BasePage {
                 echo '
                 <div class="col-md-6 mb-4">
                     <div class="card h-100 shadow-sm flex-row overflow-hidden">
-                        <img src="'.$img.'" class="card-img-left" style="width: 150px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="detail.php?id='.$row['id'].'" class="text-decoration-none">'.$row['title'].'</a></h5>
-                            <p class="card-text small text-muted">'.substr($row['summary'], 0, 80).'...</p>
-                            <a href="detail.php?id='.$row['id'].'" class="btn btn-sm btn-outline-primary">Xem</a>
+                        <div style="width: 150px; flex-shrink: 0;">
+                            <a href="detail.php?id='.$row['id'].'">
+                                <img src="'.$img.'" class="h-100 w-100" style="object-fit: cover;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title"><a href="detail.php?id='.$row['id'].'" class="text-decoration-none text-dark fw-bold">'.$row['title'].'</a></h5>
+                            <p class="card-text small text-muted flex-grow-1">'.substr($row['summary'], 0, 80).'...</p>
+                            <div class="mt-2">
+                                <a href="detail.php?id='.$row['id'].'" class="btn btn-sm btn-outline-primary rounded-pill">Xem chi tiết</a>
+                            </div>
                         </div>
                     </div>
                 </div>';
             }
         } else {
-            echo '<div class="col-12"><div class="alert alert-warning">Chưa có bài viết trong mục này.</div></div>';
+            echo '<div class="col-12"><div class="alert alert-warning text-center">Chưa có bài viết nào trong mục "'.htmlspecialchars($catName).'".</div></div>';
         }
         echo '</div>';
     }
 }
-$page = new CategoryPage("Danh mục " . $_GET['cat']);
+
+// Lấy tên danh mục để đặt Title cho tab trình duyệt
+$catParam = isset($_GET['cat']) ? $_GET['cat'] : "Tin tức";
+$page = new CategoryPage("Chuyên mục: " . $catParam);
 $page->render();
 ?>
