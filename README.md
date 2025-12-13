@@ -73,94 +73,63 @@ Hệ thống sử dụng 5 bảng dữ liệu được thiết kế chuẩn hóa
 
 ## 3. Hướng Dẫn Cài Đặt (Installation Guide)
 
-Vui lòng làm theo đúng thứ tự các bước sau:
+Vui lòng làm theo đúng thứ tự các bước sau để web chạy ổn định:
 
 ### Bước 1: Tải và Cài đặt XAMPP
+- Tải XAMPP phiên bản hỗ trợ PHP 7.4 hoặc 8.x (Khuyên dùng bản **8.0.30**).
+- Cài đặt xong, mở **XAMPP Control Panel**.
+- Bấm **Start** hai dòng đầu tiên: `Apache` và `MySQL`.
 
-- Tải XAMPP 8.0.30 (**bắt buộc đúng phiên bản**).
-- Gợi ý: Tìm bản `XAMPP Windows x64 8.0.30` trên trang chủ Apache Friends.
-- Cài đặt xong, **chưa cần bật server** vội.
+### Bước 2: Khởi tạo Project
+1. Vào thư mục `C:\xampp\htdocs\`.
+2. Tạo một thư mục mới tên là `s-news`.
+3. Copy toàn bộ mã nguồn (các thư mục `admin`, `classes`, `css`, `pages`...) vào trong thư mục `s-news` vừa tạo.
 
-### Bước 2: Chạy Script khởi tạo
+### Bước 3: Nhập Cơ sở dữ liệu (Import Database)
+1. Mở trình duyệt, truy cập: `http://localhost/phpmyadmin/`
+2. Bấm **New (Mới)** ở cột trái -> Đặt tên database là `s_news_db` -> Bấm **Create**.
+3. Chọn database vừa tạo -> Bấm tab **Import (Nhập)**.
+4. Bấm **Choose File** -> Chọn file `setup_database.sql` trong thư mục dự án.
+5. Bấm **Import** (hoặc **Go**) ở cuối trang để tạo bảng và dữ liệu mẫu.
 
-1. Để 2 file `setup-solution.cmd` và `download.cmd` chung một thư mục bất kỳ.
-2. Chạy file `setup-solution.cmd`.
-3. Đợi script chạy xong.  
-   Script sẽ tự động:
-   - Tạo thư mục `C:\xampp\htdocs\s-news`
-   - Tải các thư viện cần thiết (Bootstrap, jQuery, FontAwesome).
-
-### Bước 3: Copy Mã nguồn
-
-1. Giải nén file code của bạn.
-2. Copy toàn bộ nội dung (các file `.php`, folder `css`, `images`, `js`...)  
-   và dán vào thư mục:  
-   `C:\xampp\htdocs\s-news`
-3. Chọn **"Replace" (Ghi đè)** nếu được hỏi.
-
-### Bước 4: Khởi động Server
-
-1. Mở **XAMPP Control Panel**.
-2. Bấm **Start** dòng `Apache`.
-3. Bấm **Start** dòng `MySQL`.
-
-### Bước 5: Nhập Cơ sở dữ liệu (Import Database)
-
-1. Mở trình duyệt vào: `http://localhost/phpmyadmin/index.php`
-2. Bấm **New (Mới)** ở cột trái, tạo database tên: `s_news_db`.
-3. Chọn database vừa tạo, bấm tab **Import (Nhập)**.
-4. Bấm **Choose File**, chọn file `setup_database.sql` trong thư mục  
-   `C:\xampp\htdocs\s-news`.
-5. Bấm **Import** (hoặc **Go**) ở cuối trang.
-
-### Bước 6: Hoàn tất
-
-- Truy cập: `http://localhost/s-news/` để sử dụng.
+### Bước 4: Hoàn tất
+- Truy cập trang chủ: `http://localhost/s-news/`
 
 ---
 
-## 4. Hướng Dẫn Chỉnh Sửa Nội Dung
+## 4. Hướng Dẫn Quản Trị & Chỉnh Sửa Nội Dung
 
 ### 4.1. Chỉnh sửa trang Giới thiệu (About)
+Nội dung trang About là tĩnh (không nằm trong Database), bạn sửa trực tiếp trong code.
+- **File cần sửa:** `pages/about.php` (Dùng Notepad++ hoặc VS Code).
+- **Thay đổi ảnh:** Copy ảnh vào `images/avatars/`, sau đó sửa tên file trong hàm `getImageUrl("ten-anh.jpg")`.
+- **Thay đổi nội dung:** Sửa văn bản tiếng Việt nằm giữa các thẻ HTML.
 
-Nội dung trang About **không nằm trong Database** mà nằm trong file code.
+### 4.2. Quản lý Bài viết (Qua trang Admin)
+Hệ thống đã tích hợp trang quản trị riêng, không cần thao tác trong Database.
 
-- File cần sửa: `pages/about.php`  
-  (Dùng Notepad++ hoặc VS Code để mở).
+#### Đăng nhập Admin
+1. Truy cập: `http://localhost/s-news/admin/login.php`
+2. Nhập tài khoản quản trị (Mặc định trong DB):
+   - **User:** `admin`
+   - **Pass:** `123456`
+   *(Lưu ý: Chỉ tài khoản có quyền `admin` mới đăng nhập được)*.
 
-#### Cách thay đổi ảnh thành viên
+#### Các chức năng quản lý
+Sau khi đăng nhập, bạn sẽ được chuyển đến **Dashboard**:
+1.  **Thêm bài viết:**
+    - Bấm nút **"Thêm bài mới"**.
+    - Nhập tiêu đề, chọn danh mục, tải ảnh đại diện.
+    - Soạn thảo nội dung bài viết bằng công cụ Word (CKEditor).
+    - Bấm **Đăng bài viết**.
+2.  **Sửa bài viết:**
+    - Tại danh sách bài viết, bấm nút **Sửa (Icon màu vàng)**.
+    - Thay đổi thông tin và bấm **Lưu thay đổi**.
+3.  **Xóa bài viết:**
+    - Bấm nút **Xóa (Icon màu đỏ)**.
+    - Xác nhận xóa (Banner liên quan đến bài viết cũng sẽ tự động bị xóa).
 
-1. Tìm đoạn:  
-   `getImageUrl("tên-file-cũ.jpg")`
-2. Sửa thành tên ảnh của bạn, ví dụ:  
-   `getImageUrl("hinh-moi.png")` (nhớ kèm đuôi file).
-3. Lưu ý: Ảnh phải bỏ vào thư mục: `images/avatars/`.
-
-#### Cách thay đổi thông tin
-
-- Tìm và sửa trực tiếp các đoạn văn bản:
-  - Tên (VD: `Nguyen Van A`)
-  - Vai trò (VD: `Developer`)
-- Sửa phần nhiệm vụ trong các thẻ `<li>...</li>`  
-  (Nên tóm tắt thành **3 mục** cho đẹp).
-
----
-
-### 4.2. Quản lý Bài viết & Banner (Qua phpMyAdmin)
-
-- Truy cập: `http://localhost/phpmyadmin/index.php`
-- Chọn database: `s_news_db`.
-
-#### Thêm mới
-
-1. Chọn bảng (`articles`, `banners`...).
-2. Chọn tab **Insert (Chèn)**.
-3. Điền thông tin.
-4. Bấm **Go** để lưu.
-
-#### Sửa / Xóa
-
-1. Chọn bảng.
-2. Chọn tab **Browse (Duyệt)**.
-3. Tìm dòng cần chỉnh.
-4. Bấm **Edit (Sửa)** hoặc **Delete (Xóa)**.
+### 4.3. Quản lý khác (Banner, User)
+Hiện tại các chức năng này thực hiện qua phpMyAdmin:
+- **Banner:** Bảng `banners`.
+- **Tài khoản:** Bảng `users` (Có thể thêm user mới và set cột `role` thành `admin` hoặc `user`).

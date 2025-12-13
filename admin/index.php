@@ -10,11 +10,15 @@ require_once '../classes/Database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Lấy danh sách bài viết (kèm tên danh mục)
-$sql = "SELECT a.*, c.name as cat_name 
+// --- CẬP NHẬT SQL ---
+// Thêm đoạn subquery: (SELECT COUNT(*) ...) as is_banner
+// Để biết bài viết này có đang nằm trong bảng banners không
+$sql = "SELECT a.*, c.name as cat_name,
+        (SELECT COUNT(*) FROM banners WHERE link_url = CONCAT('pages/detail.php?id=', a.id)) as is_banner
         FROM articles a 
         LEFT JOIN categories c ON a.category_id = c.category_id 
         ORDER BY a.created_at DESC";
+
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -53,10 +57,9 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th class="ps-4">ID</th>
                             <th>Hình ảnh</th>
-                            <th style="width: 40%;">Tiêu đề</th>
+                            <th style="width: 35%;">Tiêu đề</th>
                             <th>Danh mục</th>
-                            <th>Ngày đăng</th>
-                            <th class="text-end pe-4">Hành động</th>
+                            <th>Banner</th> <th class="text-end pe-4">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,15 +75,28 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="../pages/detail.php?id=<?php echo $row['id']; ?>" target="_blank" class="text-decoration-none fw-bold text-dark">
                                     <?php echo htmlspecialchars($row['title']); ?>
                                 </a>
+                                <div class="small text-muted"><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></div>
                             </td>
                             <td><span class="badge bg-info text-dark"><?php echo $row['cat_name'] ?? 'Chưa phân loại'; ?></span></td>
-                            <td class="text-muted small"><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></td>
+                            
+                            <td>
+                                <?php if ($row['is_banner'] > 0): ?>
+                                    <a href="toggle_banner.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-warning text-dark fw-bold" title="Gỡ khỏi Banner">
+                                        <i class="fa-solid fa-star"></i> Đã ghim
+                                    </a>
+                                <?php else: ?>
+                                    <a href="toggle_banner.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-secondary" title="Thêm vào Banner">
+                                        <i class="fa-regular fa-star"></i> Ghim
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+
                             <td class="text-end pe-4">
-                                <a href="edit_article.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-warning me-1" title="Sửa">
+                                <a href="edit_article.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary me-1" title="Sửa">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
                                 <a href="delete_article.php?id=<?php echo $row['id']; ?>" 
-                                   class="btn btn-sm btn-danger" 
+                                   class="btn btn-sm btn-outline-danger" 
                                    onclick="return confirm('Bạn có chắc chắn muốn xóa bài này không?');" title="Xóa">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
