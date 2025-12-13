@@ -70,11 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <form method="POST">
             <div class="mb-3">
                 <label class="form-label fw-bold">Tài khoản</label>
-                <input type="text" name="username" class="form-control" placeholder="Nhập admin..." required>
+                <input type="text" name="username" class="form-control" placeholder="Nhập tài khoản" required>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold">Mật khẩu</label>
-                <input type="password" name="password" class="form-control" placeholder="Nhập 123456..." required>
+                <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required>
             </div>
             <button type="submit" class="btn btn-primary w-100 fw-bold py-2">ĐĂNG NHẬP</button>
         </form>

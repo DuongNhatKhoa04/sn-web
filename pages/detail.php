@@ -1,46 +1,54 @@
 <?php
+// Gọi các file cần thiết
 require_once '../classes/BasePage.php';
 require_once '../classes/Article.php'; 
 
 class DetailPage extends BasePage {
     protected function renderBody() {
+        // 1. Lấy ID bài viết từ đường dẫn (VD: detail.php?id=5)
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
+        // 2. Gọi Model để tìm bài viết trong Database
         $articleModel = new Article();
         $article = $articleModel->getById($id);
 
+        // Nếu không tìm thấy -> Báo lỗi
         if (!$article) {
             echo '<div class="alert alert-danger text-center my-5">Bài viết không tồn tại!</div>';
             return;
         }
 
+        // 3. Tăng lượt xem (View) lên 1
         $this->db->query("UPDATE articles SET views = views + 1 WHERE id = $id");
         
+        // 4. Chuẩn bị dữ liệu để hiển thị
         $img = $this->getImageUrl($article['image_url']);
         $likes = isset($article['likes']) ? $article['likes'] : 0;
         
-        $catName = !empty($article['cat_name']) ? $article['cat_name'] : $article['category'];
+        // Lấy thông tin danh mục
+        $catName = !empty($article['cat_name']) ? $article['cat_name'] : 'Tin tức';
         $catIcon = !empty($article['cat_icon']) ? $article['cat_icon'] : 'fa-solid fa-folder';
-        $colorClass = 'text-light';
+        $colorClass = 'text-primary';
         $bgClass = str_replace('text-', 'bg-', $colorClass); 
 
+        // 5. Lấy danh sách bình luận của bài viết này
         $cmtStmt = $this->db->prepare("SELECT * FROM comments WHERE article_id = ? ORDER BY created_at DESC");
         $cmtStmt->execute([$id]);
         $comments = $cmtStmt->fetchAll(PDO::FETCH_ASSOC);
         ?>
 
-        <nav aria-label="breadcrumb" class="mb-4 animate__animated animate__fadeInDown">
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="../index.php" class="text-decoration-none text-muted">Trang chủ</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark" aria-current="page"><?php echo $catName; ?></li>
             </ol>
         </nav>
 
-        <main class="row">
-            <article class="col-lg-8 mx-auto">
-                <h1 class="fw-bold mb-3 display-5 animate__animated animate__fadeInUp"><?php echo htmlspecialchars($article['title']); ?></h1>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="fw-bold mb-3 display-5"><?php echo htmlspecialchars($article['title']); ?></h1>
                 
-                <div class="d-flex align-items-center mb-4 border-bottom pb-3 text-muted animate__animated animate__fadeInUp delay-1">
+                <div class="d-flex align-items-center mb-4 border-bottom pb-3 text-muted">
                     <span class="badge <?php echo $bgClass; ?> text-white border-0 me-3 px-3 py-2 rounded-pill shadow-sm">
                         <i class="<?php echo $catIcon; ?> me-1 <?php echo $colorClass; ?>"></i> <?php echo $catName; ?>
                     </span>
@@ -55,26 +63,30 @@ class DetailPage extends BasePage {
                     </button>
                 </div>
 
-                <div class="text-center mb-4 animate__animated animate__fadeInUp delay-2">
+                <div class="text-center mb-4">
                     <img src="<?php echo $img; ?>" class="img-fluid rounded-4 shadow w-100" style="max-height: 500px; object-fit: cover;" alt="Minh hoạ">
                 </div>
 
-                <div class="article-content fs-5 animate__animated animate__fadeInUp delay-2" style="line-height: 1.8; text-align: justify; color: #2c3e50;">
+                <div class="article-content fs-5" style="line-height: 1.8; text-align: justify; color: #2c3e50;">
                     <p class="fw-bold fs-4 fst-italic border-start border-4 border-primary ps-3 bg-light py-2 rounded-end">
                         <?php echo $article['summary']; ?>
                     </p>
                     <div class="mt-4">
-                        <?php echo nl2br($article['content']); ?>
+                        <?php echo $article['content']; // Không dùng htmlspecialchars để hiện định dạng HTML ?>
                     </div>
                 </div>
                 
                 <div class="mt-5 text-end fst-italic text-muted">
                     <p>— Ban biên tập S-News —</p>
                 </div>
+            </div>
+        </div>
 
-                <hr class="my-5">
+        <hr class="my-5">
 
-                <section class="bg-white p-4 rounded-4 shadow-sm border">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="bg-white p-4 rounded-4 shadow-sm border">
                     <h4 class="mb-4 fw-bold text-primary"><i class="fa-regular fa-comments me-2"></i>Bình luận (<span id="cmtCount"><?php echo count($comments); ?></span>)</h4>
                     
                     <form id="commentForm" class="mb-5">
@@ -92,7 +104,7 @@ class DetailPage extends BasePage {
 
                     <div id="commentList">
                         <?php foreach ($comments as $cmt): ?>
-                            <div class="d-flex border-bottom py-3 animate__animated animate__fadeIn">
+                            <div class="d-flex border-bottom py-3">
                                 <div class="flex-shrink-0">
                                     <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($cmt['username']); ?>&background=random&color=fff" class="rounded-circle shadow-sm" width="50">
                                 </div>
@@ -106,26 +118,27 @@ class DetailPage extends BasePage {
                             </div>
                         <?php endforeach; ?>
                     </div>
-                </section>
-            </article>
-
-            <aside class="col-lg-4 d-none d-lg-block">
-                 </aside>
-        </main>
+                </div>
+            </div>
+        </div>
 
         <script>
         const STORAGE_KEY_DETAIL = 'snews_liked_final'; 
 
+        // Hàm xử lý khi bấm nút Thích
         function toggleLikeDetail(btn, articleId) {
             var $btn = $(btn);
             var rawList = JSON.parse(localStorage.getItem(STORAGE_KEY_DETAIL) || '[]');
             var likedList = rawList.map(Number);
             articleId = parseInt(articleId);
 
+            // Kiểm tra trạng thái hiện tại trong kho lưu trữ
             var isLiked = likedList.includes(articleId);
+            // Nếu đã like -> Hành động là unlike. Nếu chưa -> Hành động là like
             var action = isLiked ? 'unlike' : 'like';
             var currentCount = parseInt($btn.find('.like-count').text()) || 0;
 
+            // Cập nhật giao diện ngay lập tức
             if (action === 'like') {
                 updateDetailBtnUI($btn, true);
                 $btn.find('.like-count').text(currentCount + 1);
@@ -134,6 +147,7 @@ class DetailPage extends BasePage {
                 $btn.find('.like-count').text(Math.max(0, currentCount - 1));
             }
 
+            // Lưu trạng thái mới vào LocalStorage
             if (action === 'like') {
                 if (!likedList.includes(articleId)) likedList.push(articleId);
             } else {
@@ -141,6 +155,7 @@ class DetailPage extends BasePage {
             }
             localStorage.setItem(STORAGE_KEY_DETAIL, JSON.stringify(likedList));
 
+            // Gửi yêu cầu AJAX về server
             $.ajax({
                 url: '../api/api_like.php',
                 type: 'POST',
@@ -154,6 +169,7 @@ class DetailPage extends BasePage {
             });
         }
 
+        // Hàm cập nhật màu sắc nút bấm
         function updateDetailBtnUI($btn, isLiked) {
             var $icon = $btn.find('i');
             var $text = $btn.find('#textLike');
@@ -171,11 +187,13 @@ class DetailPage extends BasePage {
             }
         }
 
-        $(document).ready(function() {
+        window.addEventListener('load', function() {
+            // jQuery ($) đã sẵn sàng để dùng
             var likedList = JSON.parse(localStorage.getItem(STORAGE_KEY_DETAIL) || '[]').map(Number);
             var articleId = <?php echo $id; ?>;
-            var $btn = $('#btnLikeDetail');
+            var $btn = $('#btnLikeDetail'); // jQuery selector
 
+            // Nếu bài này có trong danh sách đã like -> Tô đỏ nút ngay lập tức
             if (likedList.includes(articleId)) {
                 updateDetailBtnUI($btn, true);
             }
