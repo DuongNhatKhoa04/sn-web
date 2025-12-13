@@ -5,74 +5,69 @@
 Sau khi chạy tool cài đặt và chép mã nguồn, dự án sẽ nằm tại: `C:\xampp\htdocs\s-news` với cấu trúc như sau:
 
 ```text
-s-news/
-├── api/                        # Xử lý AJAX (Bình luận, Like)
-│   ├── add_comment.php         # API xử lý thêm bình luận
-│   └── api_like.php            # API xử lý lượt thích
-├── classes/                    # Các lớp xử lý chính (OOP)
-│   ├── Article.php             # Xử lý bài viết
-│   ├── BasePage.php            # Lớp giao diện cha
-│   └── Database.php            # Kết nối CSDL
-├── css/                        # Style giao diện (style.css)
-├── images/                     # Kho ảnh (Quan trọng: Bỏ ảnh đúng folder)
-│   ├── avatars/                # Ảnh đại diện thành viên (cho trang About)
-│   ├── banners/                # Ảnh banner slider (cho trang chủ)
-│   └── posts/                  # Ảnh thumbnail bài viết
-├── js/                         # Script xử lý frontend (main.js)
-├── pages/                      # Các trang con
-│   ├── about.php               # Trang giới thiệu (Cần sửa code để thay nội dung)
-│   ├── category.php            # Trang danh mục
-│   ├── detail.php              # Trang chi tiết bài viết
-│   └── search.php              # Trang tìm kiếm
-├── vendor/                     # Thư viện (Tự động tải bởi download.cmd)
-│   ├── bootstrap/              # Bootstrap 5.3.2
-│   ├── fontawesome/            # FontAwesome 6.4.2
-│   └── jquery/                 # jQuery 3.7.1
-├── index.php                   # Trang chủ
-├── setup_database.sql          # File khởi tạo CSDL
-├── setup-solution.cmd          # Script tạo folder dự án & tải thư viện
-├── download.cmd                # Script hỗ trợ tải file
-└── README.md                   # Tài liệu hướng dẫn này
+sn-web/
+├── admin/                  # [ADMIN] Khu vực quản trị (MỚI)
+│   ├── add_article.php     # Giao diện thêm bài viết (Tích hợp CKEditor & Upload)
+│   ├── login.php           # Trang đăng nhập bảo mật
+│   ├── logout.php          # Xử lý đăng xuất
+│   └── process_add.php     # Xử lý logic thêm bài viết vào CSDL
+├── api/                    # [API] Xử lý AJAX (Không load lại trang)
+│   ├── add_comment.php     # API thêm bình luận
+│   └── api_like.php        # API xử lý Thả tim (Lưu vào bảng likes)
+├── classes/                # [LOGIC] Các lớp xử lý chính (OOP)
+│   ├── Article.php         # Quản lý bài viết (Lấy danh sách, chi tiết, tìm kiếm)
+│   ├── BasePage.php        # Khung giao diện chung (Header, Footer)
+│   └── Database.php        # Kết nối CSDL MySQL (PDO)
+├── css/                    # [GIAO DIỆN] CSS đã tách nhỏ (Modular CSS)
+│   ├── style.css           # File gốc import các file con
+│   ├── layout.css          # Bố cục chính
+│   ├── responsive.css      # Xử lý giao diện Mobile
+│   └── ...
+├── images/                 # Kho chứa ảnh
+│   └── posts/              # Chứa ảnh bài viết được upload từ Admin
+├── pages/                  # Các trang hiển thị (Front-end)
+│   ├── category.php        # Trang lọc tin theo danh mục
+│   ├── detail.php          # Trang xem chi tiết bài viết
+│   └── search.php          # Trang kết quả tìm kiếm
+├── index.php               # TRANG CHỦ
+└── setup_database.sql      # File khởi tạo CSDL
 ```
 
 ---
 
 ## 2. Cơ Sở Dữ Liệu (Database Schema)
 
-Dưới đây là mô tả các bảng dữ liệu và LƯU Ý QUAN TRỌNG khi nhập liệu để tránh lỗi web.
+Hệ thống sử dụng 5 bảng dữ liệu được thiết kế chuẩn hóa, có quan hệ ràng buộc (Foreign Key) để đảm bảo toàn vẹn dữ liệu.
 
-### 2.1. Bảng `banners` (Slider trang chủ)
+### 2.1. Bảng `users` (Người dùng & Admin)
+* **Chức năng:** Quản lý tài khoản đăng nhập vào trang quản trị.
+* **Lưu ý nhập liệu:**
+    * `role`: Chỉ chấp nhận giá trị `'admin'` (quản trị viên) hoặc `'user'` (người dùng thường).
+    * Chỉ tài khoản có `role = 'admin'` mới truy cập được trang `admin/`.
 
-- Chức năng: Quản lý ảnh chạy slide ở trang chủ.
+### 2.2. Bảng `categories` (Danh mục tin)
+* **Chức năng:** Quản lý các thể loại tin (Thể thao, Công nghệ...).
+* **Lưu ý nhập liệu:**
+    * `category_id`: Là khóa chính (Primary Key) dùng để liên kết với bài viết.
+    * `icon`: Dùng mã class của FontAwesome (VD: `fa-solid fa-futbol`).
+    * `color`: Dùng mã class màu text của Bootstrap (VD: `text-danger`, `text-primary`).
 
-Lưu ý nhập liệu:
-
-- `image_url`: Điền **tên file ảnh** (VD: `banner1.jpg`). Ảnh phải có trong `images/banners/`.
-- `link_url`: **BẮT BUỘC** phải đúng định dạng:  
-  `pages/detail.php?id=[id bài post]`  
-  Ví dụ: `pages/detail.php?id=15` (Trỏ về bài viết có ID là `15`).
-
-### 2.2. Bảng `articles` (Bài viết)
-
-- Chức năng: Chứa nội dung tin tức.
-
-Lưu ý nhập liệu:
-
-- `image_url`: Điền **tên file ảnh** (VD: `tin-moi.jpg`). Ảnh phải có trong `images/posts/`.
-- `category`: Tên danh mục (VD: `"Thể thao"`). **Phải trùng khớp** với tên trong bảng `categories`.
-
-### 2.3. Bảng `categories` (Danh mục)
-
-- Chức năng: Quản lý các thể loại tin.
-
-Lưu ý nhập liệu:
-
-- `icon`: Dùng class FontAwesome (VD: `fa-solid fa-futbol`).
-- `color`: Dùng class màu Bootstrap (VD: `text-danger`, `text-primary`).
+### 2.3. Bảng `articles` (Bài viết)
+* **Chức năng:** Lưu trữ nội dung tin tức chính.
+* **Lưu ý QUAN TRỌNG:**
+    * `category_id`: Phải nhập **ID (số nguyên)** của danh mục tương ứng trong bảng `categories` (Không nhập tên text như cũ).
+    * `author_id`: Phải nhập **ID** của tài khoản trong bảng `users`.
+    * `image_url`: Đường dẫn tương đối của ảnh (VD: `images/posts/hinh-anh.jpg`).
 
 ### 2.4. Bảng `comments` (Bình luận)
+* **Chức năng:** Lưu trữ bình luận của độc giả.
+* **Cơ chế:** Khi xóa một bài viết, các bình luận thuộc bài viết đó sẽ tự động bị xóa theo (Cơ chế `ON DELETE CASCADE`).
 
-- Chức năng: Lưu trữ bình luận của người dùng (thường được thêm tự động từ giao diện web).
+### 2.5. Bảng `banners` (Slider trang chủ)
+* **Chức năng:** Quản lý ảnh chạy slide (Carousel) ở đầu trang chủ.
+* **Lưu ý nhập liệu:**
+    * `link_url`: **BẮT BUỘC** điền đúng định dạng đường dẫn nội bộ: `pages/detail.php?id=[Mã_Bài_Viết]`.
+    * Ví dụ: `pages/detail.php?id=15` (Sẽ mở bài viết có ID là 15 khi bấm vào banner).
 
 ---
 

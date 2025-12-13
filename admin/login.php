@@ -5,7 +5,7 @@ require_once '../classes/Database.php';
 
 // Nếu người dùng ĐÃ đăng nhập rồi (có lưu trong session) -> Đuổi thẳng vào trang thêm bài
 if (isset($_SESSION['user_id']) && $_SESSION['role'] == 'admin') {
-    header("Location: add_article.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['role'] = $user['role'];
 
             // Chuyển hướng sang trang thêm bài viết
-            header("Location: add_article.php");
+            header("Location: index.php");
             exit();
         } else {
             $error = "Bạn là User thường, không được vào Admin!";

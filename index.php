@@ -1,32 +1,57 @@
 <?php
 // --- BƯỚC 1: NẠP CÁC FILE CẦN THIẾT ---
+// Gọi file BasePage.php để lấy cấu trúc khung sườn (Header, Footer)
 require_once 'classes/BasePage.php';
+// Gọi file Article.php để sử dụng các hàm lấy bài viết từ CSDL
 require_once 'classes/Article.php';
 
+// Tạo lớp HomePage kế thừa từ BasePage
 class HomePage extends BasePage {
     
+    // Hàm này chịu trách nhiệm vẽ nội dung chính (phần thân trang web)
     protected function renderBody() {
         
-        // --- A. LẤY DỮ LIỆU BANNER ---
-        $banners = [];
+        // --- A. LẤY DỮ LIỆU BANNER (ẢNH TRƯỢT) ---
+        $banners = []; // Tạo một danh sách rỗng để chứa banner
         try {
+            // 1. Tự mở kết nối riêng vào kho dữ liệu (Database) để lấy banner
+            // (Lưu ý: Nếu file Database.php đổi user/pass thì đoạn này cũng cần cập nhật theo)
             $connBanner = new PDO("mysql:host=localhost;dbname=s_news_db;charset=utf8mb4", 'root', '');
+            // Thiết lập chế độ báo lỗi ngay lập tức nếu sai truy vấn
             $connBanner->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            // 2. Soạn lệnh: "Lấy 5 banner đang bật (is_active=1), sắp xếp theo thứ tự ưu tiên"
             $stmt = $connBanner->prepare("SELECT * FROM banners WHERE is_active = 1 ORDER BY display_order ASC LIMIT 5");
+            
+            // 3. Thực thi lệnh và lấy kết quả
             $stmt->execute();
             $banners = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) { 
+            // Nếu có lỗi kết nối thì gán mảng rỗng để web không bị chết
             $banners = []; 
         }
 
-        // --- B. LẤY DANH SÁCH BÀI VIẾT ---
-        $limit = 6; 
+        // --- B. LẤY DANH SÁCH BÀI VIẾT (TIN TỨC) ---
+        $limit = 6; // Quy định: Mỗi trang chỉ hiện đúng 6 bài
+        
+        // Kiểm tra xem người dùng đang ở trang mấy (VD: index.php?page=2)
+        // Nếu không có tham số page thì mặc định là trang 1
         $currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        
+        // Tính toán vị trí bắt đầu lấy tin (Offset)
+        // VD: Trang 1 -> offset 0. Trang 2 -> offset 6 (bỏ qua 6 bài đầu)
         $offset = ($currentPage - 1) * $limit; 
         
+        // Khởi tạo đối tượng Article để xử lý dữ liệu bài viết
         $articleModel = new Article();
+        
+        // Nhờ hàm getPaginated lấy danh sách bài theo trang
         $listArticles = $articleModel->getPaginated($limit, $offset);
+        
+        // Đếm tổng số bài viết đang có trong kho để tính số trang
         $totalArticles = $articleModel->getTotalCount();
+        
+        // Tính tổng số trang (dùng hàm ceil để làm tròn lên, VD: 6.1 -> 7 trang)
         $totalPages = ceil($totalArticles / $limit); 
         ?>
         
@@ -41,10 +66,13 @@ class HomePage extends BasePage {
                                     <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="<?= $i ?>" class="<?= ($i === 0) ? 'active' : '' ?>"></button>
                                 <?php endforeach; ?>
                             </div>
+                            
                             <div class="carousel-inner">
                                 <?php foreach ($banners as $index => $banner): ?>
                                     <?php 
+                                        // Xử lý đường dẫn ảnh (nếu ảnh lỗi sẽ dùng ảnh mặc định trong hàm getImageUrl)
                                         $bannerImg = $this->getImageUrl($banner['image_url']); 
+                                        // Sửa đường dẫn link bài viết cho đúng chuẩn thư mục pages/
                                         $bannerLink = str_replace('article_detail.php', 'pages/detail.php', $banner['link_url']);
                                     ?>
                                     <div class="carousel-item <?= ($index === 0) ? 'active' : '' ?>">
@@ -59,11 +87,16 @@ class HomePage extends BasePage {
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+                            
                             <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
                             <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
                         </div>
                     <?php else: ?>
-                        <div class="alert alert-secondary text-center">Chưa có banner.</div>
+                        <div class="p-5 text-center bg-primary text-white rounded-3 shadow-sm" 
+                             style="background: linear-gradient(135deg, #0d6efd, #0dcaf0);">
+                            <h1 class="display-3 fw-bold mb-3">S-NEWS</h1>
+                            <p class="lead mb-0">Trang tin tức tổng hợp nhanh nhất, chính xác nhất.</p>
+                        </div>
                     <?php endif; ?>
                 </div>
             </section>
@@ -75,22 +108,28 @@ class HomePage extends BasePage {
 
             <section id="latest-news" class="row">
             <?php if (!empty($listArticles)) {
+                // Duyệt qua từng bài viết để in ra thẻ HTML
                 foreach ($listArticles as $row) {
-                    $link = "pages/detail.php?id=" . $row['id'];
-                    $img = $this->getImageUrl($row['image_url']);
-                    $likes = isset($row['likes']) ? $row['likes'] : 0;
+                    $link = "pages/detail.php?id=" . $row['id']; // Link xem chi tiết
+                    $img = $this->getImageUrl($row['image_url']); // Link ảnh
+                    $likes = isset($row['likes']) ? $row['likes'] : 0; // Số lượt thích hiện tại
                     
+                    // Lấy thông tin danh mục (Ưu tiên tên lấy từ bảng categories)
                     $catName = !empty($row['cat_name']) ? $row['cat_name'] : $row['category'];
                     $catIcon = !empty($row['cat_icon']) ? $row['cat_icon'] : 'fa-solid fa-folder';
+                    
+                    // Xử lý màu sắc hiển thị
                     $colorClass = 'text-light';
                     $bgClass = str_replace('text-', 'bg-', $colorClass); 
 
+                    // In ra cấu trúc thẻ bài viết (Card)
                     echo '
                     <article class="col-md-4 mb-4">
                         <div class="card h-100 shadow-sm border-0">
                             <div class="overflow-hidden" style="height: 200px;">
                                 <a href="'.$link.'"><img src="'.$img.'" class="card-img-top h-100 w-100" style="object-fit: cover;"></a>
                             </div>
+                            
                             <div class="card-body d-flex flex-column">
                                 <div class="mb-2 d-flex justify-content-between align-items-center">
                                     <div>
@@ -121,9 +160,11 @@ class HomePage extends BasePage {
             <nav aria-label="Page navigation" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item <?php echo ($currentPage <= 1) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=<?php echo $currentPage - 1; ?>"><i class="fa-solid fa-chevron-left"></i></a></li>
+                    
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                         <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>"><a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
                     <?php endfor; ?>
+                    
                     <li class="page-item <?php echo ($currentPage >= $totalPages) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=<?php echo $currentPage + 1; ?>"><i class="fa-solid fa-chevron-right"></i></a></li>
                 </ul>
             </nav>
@@ -133,28 +174,35 @@ class HomePage extends BasePage {
         <script>
         const STORAGE_KEY = 'snews_liked_final'; 
 
+        // Hàm xử lý sự kiện khi bấm nút Tim
         function toggleLike(btn, articleId) {
             var $btn = $(btn);
+            // Lấy danh sách các bài đã like từ bộ nhớ trình duyệt
             var rawList = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             var likedList = rawList.map(Number);
             articleId = parseInt(articleId);
 
+            // Kiểm tra: Nếu ID bài viết đã có trong danh sách -> Hành động là 'unlike'
             var isLiked = likedList.includes(articleId);
             var action = isLiked ? 'unlike' : 'like'; 
+            
+            // Lấy số like hiện tại trên giao diện
             var currentCount = parseInt($btn.find('.like-count').text()) || 0;
             
+            // Cập nhật giao diện NGAY LẬP TỨC (để người dùng thấy mượt mà)
             if (action === 'like') {
-                $btn.removeClass('btn-outline-danger').addClass('btn-danger'); 
-                $btn.find('i').removeClass('fa-regular').addClass('fa-solid'); 
+                $btn.removeClass('btn-outline-danger').addClass('btn-danger'); // Tô đỏ
+                $btn.find('i').removeClass('fa-regular').addClass('fa-solid'); // Đổi icon đặc
                 $btn.css('color', 'white');
-                $btn.find('.like-count').text(currentCount + 1); 
+                $btn.find('.like-count').text(currentCount + 1); // Tăng số
             } else {
-                $btn.removeClass('btn-danger').addClass('btn-outline-danger'); 
-                $btn.find('i').removeClass('fa-solid').addClass('fa-regular');
+                $btn.removeClass('btn-danger').addClass('btn-outline-danger'); // Bỏ đỏ
+                $btn.find('i').removeClass('fa-solid').addClass('fa-regular'); // Đổi icon rỗng
                 $btn.css('color', '');
-                $btn.find('.like-count').text(Math.max(0, currentCount - 1)); 
+                $btn.find('.like-count').text(Math.max(0, currentCount - 1)); // Giảm số
             }
 
+            // Lưu trạng thái mới vào bộ nhớ trình duyệt (LocalStorage)
             if (action === 'like') {
                 if (!likedList.includes(articleId)) likedList.push(articleId);
             } else {
@@ -162,12 +210,14 @@ class HomePage extends BasePage {
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(likedList));
 
+            // Gửi yêu cầu ngầm (AJAX) về Server để lưu vào Database
             $.ajax({
                 url: 'api/api_like.php',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ id: articleId, action: action }),
                 success: function(response) {
+                    // Nếu server trả về số like chính xác, cập nhật lại lần nữa cho chắc
                     if (response.success) {
                         $btn.find('.like-count').text(response.new_likes);
                     }
@@ -178,16 +228,16 @@ class HomePage extends BasePage {
         window.addEventListener('load', function() {
             var likedList = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').map(Number);
             
-            // Dùng jQuery để duyệt qua các nút like
-            // Lúc này jQuery ($) đã chắc chắn được tải xong từ Footer
+            // Duyệt qua tất cả các nút like đang hiển thị trên màn hình
             $('.like-btn').each(function() {
                 var onclickVal = $(this).attr('onclick'); 
                 if (onclickVal) {
+                    // Lấy ID bài viết từ thuộc tính onclick="toggleLike(this, 15)"
                     var match = onclickVal.match(/\d+/); 
                     if (match) {
                         var id = parseInt(match[0]);
+                        // Nếu bài này đã được like trước đó -> Tô đỏ nút ngay lập tức
                         if (likedList.includes(id)) {
-                            // Tô đỏ nút nếu đã like
                             var $btn = $(this);
                             $btn.removeClass('btn-outline-danger').addClass('btn-danger');
                             $btn.find('i').removeClass('fa-regular').addClass('fa-solid');
@@ -201,6 +251,8 @@ class HomePage extends BasePage {
         <?php
     }
 }
+
+// KHỞI CHẠY TRANG CHỦ
 $page = new HomePage("Trang chủ - SNews", true);
 $page->render();
 ?>

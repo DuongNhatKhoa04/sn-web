@@ -1,15 +1,12 @@
 <?php
-// Bắt đầu session để kiểm tra quyền đăng nhập
+// admin/add_article.php
 session_start();
 
 // --- CỔNG BẢO VỆ (Security Check) ---
-// Nếu chưa có session (chưa đăng nhập) HOẶC không phải quyền admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    // Đá về trang đăng nhập ngay lập tức
     header("Location: login.php");
     exit();
 }
-// ------------------------------------
 
 require_once '../classes/Database.php';
 
@@ -17,7 +14,7 @@ require_once '../classes/Database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Lấy danh sách danh mục (Thể thao, Công nghệ...) để đổ vào ô Select box
+// Lấy danh sách danh mục
 $cats = [];
 try {
     $stmt = $conn->query("SELECT * FROM categories");
@@ -32,6 +29,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm bài viết (Admin)</title>
     <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/fontawesome/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
 </head>
 <body class="bg-light">
@@ -49,9 +47,14 @@ try {
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="card shadow border-0 rounded-3">
-                    <div class="card-header bg-white border-bottom py-3">
+                    
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h4 class="mb-0 text-primary fw-bold">Thêm Bài Viết Mới</h4>
+                        <a href="index.php" class="btn btn-outline-secondary btn-sm">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách
+                        </a>
                     </div>
+
                     <div class="card-body p-4">
                         <form action="process_add.php" method="POST" enctype="multipart/form-data">
                             
@@ -67,7 +70,7 @@ try {
                                         <?php if (!empty($cats)): ?>
                                             <?php foreach($cats as $c): ?>
                                                 <?php 
-                                                    // Kiểm tra tên cột trong CSDL là 'name' hay 'cat_name' để lấy cho đúng
+                                                    // Kiểm tra tên cột
                                                     $catName = isset($c['name']) ? $c['name'] : (isset($c['cat_name']) ? $c['cat_name'] : 'Không tên');
                                                     $catID = isset($c['category_id']) ? $c['category_id'] : $c['id'];
                                                 ?>

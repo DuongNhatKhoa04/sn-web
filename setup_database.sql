@@ -59,16 +59,7 @@ CREATE TABLE comments (
     FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- BẢNG 5: LIKES
-CREATE TABLE likes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL,
-    ip_address VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- BẢNG 6: BANNERS
+-- BẢNG 5: BANNERS
 CREATE TABLE banners (
     id INT AUTO_INCREMENT PRIMARY KEY,
     image_url VARCHAR(255) NOT NULL,
