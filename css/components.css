@@ -1,0 +1,107 @@
+/* --- CARDS --- */
+.card {
+    border: none !important;
+    border-radius: 20px !important;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.8s both;
+}
+.col-md-4:nth-child(1) .card { animation-delay: 0.1s; }
+.col-md-4:nth-child(2) .card { animation-delay: 0.3s; }
+.col-md-4:nth-child(3) .card { animation-delay: 0.5s; }
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--hover-shadow) !important;
+}
+
+.card-img-top {
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+.card:hover .card-img-top { transform: scale(1.1); }
+
+.card-title a {
+    color: var(--text-dark);
+    font-weight: 700;
+    text-decoration: none;
+    background-image: linear-gradient(to right, var(--color-primary) 0%, var(--color-secondary) 100%);
+    background-size: 0% 2px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 0.3s;
+}
+.card-title a:hover { background-size: 100% 2px; }
+
+/* --- BADGE --- */
+.badge {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent)) !important;
+    border-radius: 30px;
+    padding: 6px 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(108, 93, 211, 0.3);
+}
+
+/* --- BUTTONS --- */
+.btn-primary, .btn-outline-primary {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-primary));
+    background-size: 200% auto;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 10px 25px;
+    box-shadow: 0 5px 15px rgba(255, 117, 143, 0.4);
+    transition: 0.5s;
+    animation: gradientFlow 3s infinite linear;
+}
+.btn-primary:hover {
+    background-position: right center;
+    transform: translateY(-2px);
+}
+
+/* --- CAROUSEL --- */
+#newsCarousel {
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+    border: 5px solid #fff;
+    animation: fadeInUp 1s ease-out;
+}
+
+/* --- COMMENTS --- */
+#commentList .d-flex {
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 5px solid var(--color-primary);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    transition: transform 0.3s;
+}
+#commentList .d-flex:hover { transform: translateX(10px); }
+
+/* --- PAGINATION --- */
+.pagination { gap: 12px; padding: 20px 0; align-items: center; }
+.page-link {
+    border: none !important; border-radius: 50% !important;
+    width: 45px; height: 45px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: 'Montserrat', sans-serif;
+    color: var(--text-dark); background-color: #fff;
+    box-shadow: 0 5px 15px rgba(183, 153, 255, 0.2);
+    transition: all 0.4s;
+}
+.page-link:hover {
+    transform: translateY(-8px) scale(1.1);
+    background-color: var(--color-accent); color: #fff;
+}
+.page-item.active .page-link {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: #fff; transform: scale(1.2);
+}

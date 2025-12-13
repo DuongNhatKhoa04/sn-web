@@ -1,0 +1,33 @@
+/* Tùy chỉnh ảnh bài viết trong trang chi tiết */
+article.blog-post img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+/* Responsive cho Mobile (Màn hình nhỏ hơn 768px) */
+@media (max-width: 768px) {
+    .navbar-brand { font-size: 1.2rem !important; }
+
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Ảnh trong bài viết không bị tràn */
+    .article-content img { width: 100% !important; height: auto !important; }
+
+    h1.display-5 { font-size: 1.8rem; line-height: 1.3; }
+
+    aside {
+        margin-top: 30px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+    
+    main.container, main.row { padding-left: 10px; padding-right: 10px; }
+    
+    /* Footer căn giữa trên mobile */
+    footer p { text-align: center; font-size: 0.9rem; }
+}
