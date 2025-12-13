@@ -1,14 +1,15 @@
 <?php
-// admin/add_article.php
-session_start(); // 1. Khởi động session
+// Bắt đầu session để kiểm tra quyền đăng nhập
+session_start();
 
-// --- CỔNG BẢO VỆ: CHẶN KHÔNG CHO VÀO NẾU CHƯA ĐĂNG NHẬP ---
+// --- CỔNG BẢO VỆ (Security Check) ---
+// Nếu chưa có session (chưa đăng nhập) HOẶC không phải quyền admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    // Chưa đăng nhập hoặc không phải admin -> Đá về trang Login
+    // Đá về trang đăng nhập ngay lập tức
     header("Location: login.php");
     exit();
 }
-// -----------------------------------------------------------
+// ------------------------------------
 
 require_once '../classes/Database.php';
 
@@ -16,7 +17,7 @@ require_once '../classes/Database.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-// Lấy danh mục... (Code cũ giữ nguyên)
+// Lấy danh sách danh mục (Thể thao, Công nghệ...) để đổ vào ô Select box
 $cats = [];
 try {
     $stmt = $conn->query("SELECT * FROM categories");
@@ -37,7 +38,6 @@ try {
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
         <div class="container">
             <span class="navbar-brand mb-0 h1 fw-bold">S-NEWS ADMIN</span>
-            
             <div class="ms-auto d-flex align-items-center gap-3">
                 <span class="text-white">Xin chào, <strong><?php echo $_SESSION['full_name']; ?></strong></span>
                 <a href="logout.php" class="btn btn-light btn-sm fw-bold text-primary">Đăng xuất</a>
@@ -50,7 +50,7 @@ try {
             <div class="col-lg-10">
                 <div class="card shadow border-0 rounded-3">
                     <div class="card-header bg-white border-bottom py-3">
-                        <h4 class="mb-0 text-primary fw-bold"><i class="fa-solid fa-pen-nib"></i> Thêm Bài Viết Mới</h4>
+                        <h4 class="mb-0 text-primary fw-bold">Thêm Bài Viết Mới</h4>
                     </div>
                     <div class="card-body p-4">
                         <form action="process_add.php" method="POST" enctype="multipart/form-data">
@@ -67,12 +67,9 @@ try {
                                         <?php if (!empty($cats)): ?>
                                             <?php foreach($cats as $c): ?>
                                                 <?php 
-                                                    // Logic hiển thị tên danh mục thông minh
-                                                    $catName = "Không tên";
-                                                    if (isset($c['name'])) $catName = $c['name'];
-                                                    elseif (isset($c['cat_name'])) $catName = $c['cat_name'];
-                                                    
-                                                    $catID = isset($c['category_id']) ? $c['category_id'] : (isset($c['id']) ? $c['id'] : 0);
+                                                    // Kiểm tra tên cột trong CSDL là 'name' hay 'cat_name' để lấy cho đúng
+                                                    $catName = isset($c['name']) ? $c['name'] : (isset($c['cat_name']) ? $c['cat_name'] : 'Không tên');
+                                                    $catID = isset($c['category_id']) ? $c['category_id'] : $c['id'];
                                                 ?>
                                                 <option value="<?php echo $catID; ?>"><?php echo $catName; ?></option>
                                             <?php endforeach; ?>

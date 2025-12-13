@@ -4,9 +4,9 @@ require_once '../classes/BasePage.php';
 class CategoryPage extends BasePage {
     protected function renderBody() {
         // Lấy tên danh mục từ URL (VD: category.php?cat=Thể Thao)
-        // Nếu không có thì mặc định là rỗng
         $catName = isset($_GET['cat']) ? $_GET['cat'] : '';
 
+        // Nếu không có tên danh mục thì báo lỗi
         if (empty($catName)) {
             echo '<div class="alert alert-danger">Không tìm thấy danh mục yêu cầu.</div>';
             return;
@@ -14,9 +14,9 @@ class CategoryPage extends BasePage {
 
         echo '<h2 class="mb-4 border-bottom pb-2">Chuyên mục: <span class="text-success">'.htmlspecialchars($catName).'</span></h2>';
         
-        // --- SỬA LỖI Ở ĐÂY ---
-        // Code cũ: SELECT * FROM articles WHERE category = ? (Sai vì không còn cột category)
-        // Code mới: JOIN bảng categories để tìm theo TÊN danh mục
+        // --- CÂU LỆNH SQL QUAN TRỌNG ---
+        // Kết nối bảng articles (a) và categories (c) bằng category_id
+        // Sau đó lọc (WHERE) những dòng mà tên danh mục (c.name) trùng với yêu cầu
         $sql = "SELECT a.* FROM articles a
                 JOIN categories c ON a.category_id = c.category_id
                 WHERE c.name = :name
@@ -26,10 +26,12 @@ class CategoryPage extends BasePage {
         $stmt->execute([':name' => $catName]);
         
         echo '<div class="row">';
+        // Nếu có bài viết nào tìm thấy
         if($stmt->rowCount() > 0) {
+            // Lặp qua từng bài viết
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $img = $this->getImageUrl($row['image_url']);
-                // In ra bài viết dạng thẻ nằm ngang
+                // In ra giao diện thẻ bài viết (Card)
                 echo '
                 <div class="col-md-6 mb-4">
                     <div class="card h-100 shadow-sm flex-row overflow-hidden">
@@ -55,7 +57,7 @@ class CategoryPage extends BasePage {
     }
 }
 
-// Lấy tên danh mục để đặt Title cho tab trình duyệt
+// Khởi tạo trang và vẽ giao diện
 $catParam = isset($_GET['cat']) ? $_GET['cat'] : "Tin tức";
 $page = new CategoryPage("Chuyên mục: " . $catParam);
 $page->render();

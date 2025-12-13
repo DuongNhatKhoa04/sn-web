@@ -30,7 +30,7 @@ if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 cd /d "%TARGET_DIR%"
 
 :: --- CAP NHAT: Them folder 'api' vao danh sach ---
-for %%F in (classes pages css js images vendor api) do (
+for %%F in (classes pages css js images vendor api admin) do (
     if not exist "%%F" mkdir "%%F"
 )
 mkdir "vendor\bootstrap\css" 2>nul

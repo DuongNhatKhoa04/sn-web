@@ -1,27 +1,32 @@
 <?php
 class Database {
-    // Thông tin đăng nhập vào "nhà kho" dữ liệu
-    private $host = "localhost";    // Địa chỉ nhà kho (thường là máy hiện tại)
-    private $db_name = "s_news_db"; // Tên của nhà kho (Cơ sở dữ liệu)
-    private $username = "root";     // Tên người giữ kho (Mặc định là root)
-    private $password = "";         // Mật khẩu (Mặc định để trống)
-    public $conn;                   // Biến này sẽ giữ kết nối sau khi mở cửa thành công
+    // Thông tin để mở cửa kho dữ liệu (Bạn sửa lại nếu khác)
+    private $host = "localhost";      // Địa chỉ máy chủ (thường là localhost)
+    private $db_name = "s_news_db";   // Tên kho dữ liệu (Database Name)
+    private $username = "root";       // Tên đăng nhập vào kho (XAMPP mặc định là root)
+    private $password = "";           // Mật khẩu (XAMPP mặc định là rỗng)
+    public $conn;                     // Biến lưu trữ kết nối đang mở
 
-    // Hàm thực hiện hành động mở cửa kết nối
+    // Hàm lấy kết nối (Giống như việc xin chìa khóa)
     public function getConnection() {
-        $this->conn = null; // Ban đầu chưa có kết nối
+        $this->conn = null; // Ban đầu chưa có chìa khóa
+
         try {
-            // Thử kết nối với các thông tin đã khai báo ở trên
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
-            // Đặt chế độ hiển thị phông chữ tiếng Việt không bị lỗi (UTF-8)
-            $this->conn->exec("set names utf8mb4");
-            // Nếu có lỗi thì báo ngay lập tức để biết mà sửa
+            // Thử kết nối vào MySQL bằng thư viện PDO (PHP Data Objects)
+            // Lệnh này giống như gõ cửa: "Cho tôi vào kho s_news_db với tên root"
+            $this->conn = new PDO(
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
+                $this->username,
+                $this->password
+            );
+            // Cài đặt chế độ báo lỗi: Nếu có lỗi thì báo ngay lập tức (Exception)
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $exception) {
-            // Nếu kết nối thất bại, in ra màn hình lỗi gì
-            echo "Loi ket noi: " . $exception->getMessage();
+            // Nếu kết nối thất bại (sai pass, sai tên db...) thì báo lỗi ra màn hình
+            echo "Lỗi kết nối CSDL: " . $exception->getMessage();
         }
-        // Trả về kết nối đã mở thành công để các file khác sử dụng
+
+        // Trả về cái chìa khóa (biến kết nối) để các file khác dùng
         return $this->conn;
     }
 }
